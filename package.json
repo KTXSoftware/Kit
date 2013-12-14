@@ -1,0 +1,5 @@
+{
+	"name": "Kit",
+	"main": "index.html",
+	"js-flags": "--harmony"
+}
