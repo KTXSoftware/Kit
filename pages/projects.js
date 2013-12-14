@@ -4,6 +4,7 @@ var http = require("http");
 var fs   = require("fs");
 var page = require("../page.js");
 var config = require("../config.js");
+var projectPage = require("./project.js");
 
 var document = window.document;
 
@@ -41,7 +42,7 @@ function loadRepositories(table) {
 					td = document.createElement("td");
 					var button = new Button("Open");
 					button.element.onclick = function() {
-						loadProjectPage(repositories[repo]);
+						projectPage.load(repositories[repo]);
 					};
 					td.appendChild(button.element);
 					tr.appendChild(td);
