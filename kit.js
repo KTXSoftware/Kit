@@ -1,13 +1,5 @@
 "use strict";
 
-String.prototype.endsWith = function(suffix) {
-	return this.indexOf(suffix, this.length - suffix.length) !== -1;
-};
-
-String.prototype.contains = function(substring) {
-	return this.indexOf(substring) !== -1;
-};
-
 var log    = require("./log.js");
 var config = require("./config.js");
 var projectsPage = require("./pages/projects.js");
