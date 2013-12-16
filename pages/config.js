@@ -26,13 +26,18 @@ exports.load = function() {
 	table.appendChild(createRow2(document.createTextNode("Username"), input));
 
 	var input2 = document.createElement("input");
+	input2.setAttribute("type", "password");
 	input2.onchange = function() {
 		config.setPassword(md5(input2.value));
 	}
 	table.appendChild(createRow2(document.createTextNode("Password"), input2));
 
-	var projectsDirButton = document.createElement("button");
-	projectsDirButton.appendChild(document.createTextNode("/Projects"));
+	var projectsDirButton = document.createElement("input");
+	projectsDirButton.setAttribute("type", "file");
+	projectsDirButton.setAttribute("nwdirectory");
+	projectsDirButton.onchange = function() {
+		config.setProjectsDirectory(projectsDirButton.value);
+	}
 	table.appendChild(createRow2(document.createTextNode("Projects directory"), projectsDirButton));
 	table.appendChild(createRow2(document.createTextNode("MP3 encoder"), document.createTextNode("_")));
 	table.appendChild(createRow2(document.createTextNode("AAC encoder"), document.createTextNode("_")));

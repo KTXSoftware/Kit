@@ -1,7 +1,6 @@
 "use strict";
 
 var http = require("http");
-var fs   = require("fs");
 var page = require("../page.js");
 var config = require("../config.js");
 var projectPage = require("./project.js");

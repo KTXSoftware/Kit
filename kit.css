@@ -1,0 +1,30 @@
+html, body {
+	height: 100%;
+	margin: 0;
+}
+
+div.kit {
+	display: table;
+	width: 100%;
+	height: 100%;
+}
+
+div.top {
+	display: table-row;
+}
+
+div.center {
+	display: table-row;
+	height: 100%;
+}
+
+div.content {
+	height: 100%;
+	overflow: auto;
+}
+
+div.bottom {
+	display: table-row;
+	text-align: center;
+	vertical-align: middle;
+}

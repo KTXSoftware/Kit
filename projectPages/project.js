@@ -1,6 +1,6 @@
 var document = window.document;
 
-exports.load = function(repository, element) {
+exports.load = function(repository, kha, element) {
 	var select = document.createElement("select");
 	var option = document.createElement("option");
 	option.appendChild(document.createTextNode("Flash"));
