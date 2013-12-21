@@ -13,6 +13,22 @@ div.top {
 	display: table-row;
 }
 
+div.topmenu {
+	display: table;
+}
+
+div.topmenu2 {
+	display: table-row;
+}
+
+div.topleft {
+	display: table-row;
+}
+
+div.topright {
+	display: table-row;
+}
+
 div.center {
 	display: table-row;
 	height: 100%;

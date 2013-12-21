@@ -7,7 +7,6 @@ var configPage   = require("./pages/config.js");
 var logPage      = require("./pages/log.js");
 
 window.onload = function() {
-	log.info("Starting up.");
 	if (config.username() === null) configPage.load();
 	else projectsPage.load();
 	document.getElementById("projectsButton").onclick = projectsPage.load;

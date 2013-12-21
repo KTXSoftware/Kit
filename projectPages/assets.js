@@ -1,3 +1,5 @@
+"use strict";
+
 var document = window.document;
 
 function clear(element) {
@@ -6,11 +8,21 @@ function clear(element) {
 	}
 }
 
+function remove(array, at) {
+	var rest = array.slice(at + 1);
+	array.length = at < 0 ? array.length + at : at;
+	return array.push.apply(array, rest);
+}
+
 function loadAssets(assets, type, element) {
 	clear(element);
+	var table = document.createElement("table");
 	for (var asset in assets) {
+		let current = assets[asset];
 		if (assets[asset].type === type) {
-			element.appendChild(document.createElement("br"));
+			var tr = document.createElement("tr");
+			var td = document.createElement("td");
+
 			var a = document.createElement("a");
 			a.setAttribute("href", "#");
 			a.onclick = function() {
@@ -18,9 +30,27 @@ function loadAssets(assets, type, element) {
 				return false;
 			};
 			a.appendChild(document.createTextNode(assets[asset].name));
-			element.appendChild(a);
+			td.appendChild(a);
+			tr.appendChild(td);
+
+			td = document.createElement("td");
+			var button = document.createElement("button");
+			button.appendChild(document.createTextNode("-"));
+			button.onclick = function() {
+				for (var asset in assets) {
+					if (assets[asset].type === type && assets[asset].name === current.name) {
+						remove(assets, assets.indexOf(assets[asset]));
+						loadAssets(assets, type, element);
+						return;
+					}
+				}
+			};
+			td.appendChild(button);
+			tr.appendChild(td);
+			table.appendChild(tr);
 		}
 	}
+	element.appendChild(table);
 }
 
 exports.load = function(repository, kha, element) {
