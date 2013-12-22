@@ -92,7 +92,7 @@ function loadRepositories(table) {
 			data += chunk;
 		});
 		res.on("end", function() {
-			addProjects(findProjectDirs(repositories), table);
+			addProjects(findProjectDirs(JSON.parse(data).repositories), table);
 		});
 	}).on("error", function(e) {
 		log.error("Could not download list of projects.");
