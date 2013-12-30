@@ -1,0 +1,4 @@
+[submodule "node_modules/git"]
+	path = node_modules/git
+	url = ../node-git
+	branch = master
