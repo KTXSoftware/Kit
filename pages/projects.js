@@ -1,5 +1,6 @@
 "use strict";
 
+var git = require("git");
 var fs = require("fs");
 var http = require("http");
 var log = require("../log.js");
@@ -65,8 +66,15 @@ function addProjects(projects, table) {
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		if (projects[project].available) var button = new Button("Update");
-		else var button = new Button("Download");
+		if (projects[project].available) {
+			var button = new Button("Update");
+		}
+		else {
+			var button = new Button("Download");
+			button.element.onclick = function() {
+				git.clone("https://github.com/KTXSoftware/" + projects[project].project + ".git", config.projectsDirectory() + "/" + projects[project].project, function() { window.alert("done"); });
+			};
+		}
 		td.appendChild(button.element);
 		tr.appendChild(td);
 
