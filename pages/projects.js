@@ -71,10 +71,11 @@ function addProjects(projects, table) {
 		}
 		else {
 			var button = new Button("Download");
-			button.element.onclick = function() {
-				git.clone("https://github.com/KTXSoftware/" + projects[project].project + ".git", config.projectsDirectory() + "/" + projects[project].project, function() { window.alert("done"); });
-			};
+			
 		}
+		button.element.onclick = function() {
+			git.update(projects[project].project, "https://github.com/KTXSoftware/", config.projectsDirectory() + "/", function() { window.alert("done"); });
+		};
 		td.appendChild(button.element);
 		tr.appendChild(td);
 
