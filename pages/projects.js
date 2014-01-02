@@ -3,6 +3,7 @@
 var git = require("git");
 var fs = require("fs");
 var http = require("http");
+var https = require("https");
 var log = require("../log.js");
 var page = require("../page.js");
 var config = require("../config.js");
@@ -34,16 +35,16 @@ function findProjectDirs(repositories) {
 	if (repositories !== undefined) {
 		for (var repo in repositories) {
 			if (repositories[repo] === null
-				|| repositories[repo].endsWith("/")
-				|| repositories[repo].startsWith("Archive/")
+				|| repositories[repo].name.endsWith("/")
+				|| repositories[repo].name.startsWith("Archive/")
 				) continue;
 
-			if (contains(dirs, repositories[repo])) {
-				remove(dirs, dirs.indexOf(repositories[repo]));
-				projects.push({project: repositories[repo], available: true});
+			if (contains(dirs, repositories[repo].name)) {
+				remove(dirs, dirs.indexOf(repositories[repo].name));
+				projects.push({project: repositories[repo].name, available: true});
 			}
 			else {
-				projects.push({project: repositories[repo], available: false});
+				projects.push({project: repositories[repo].name, available: false});
 			}
 		}
 	}
@@ -93,7 +94,13 @@ function addProjects(projects, table) {
 }
 
 function loadRepositories(table) {
-	http.get("http://dev.ktxsoftware.com/kit.json?username=" + config.username() + "&password=" + config.password(), function(res) {
+	var options = {
+		host: "api.github.com",
+		path: "/orgs/ktxsoftware/repos",
+		headers: {"User-Agent": "RobDangerous"},
+	};
+	https.get(options, function(res) {
+	//http.get("http://dev.ktxsoftware.com/kit.json?username=" + config.username() + "&password=" + config.password(), function(res) {
 		log.info("Downloaded list of projects.");
 		res.setEncoding("utf8");
 		let data = "";
@@ -101,7 +108,9 @@ function loadRepositories(table) {
 			data += chunk;
 		});
 		res.on("end", function() {
-			addProjects(findProjectDirs(JSON.parse(data).repositories), table);
+			var a = 3;
+			++a;
+			addProjects(findProjectDirs(JSON.parse(data)), table);
 		});
 	}).on("error", function(e) {
 		log.error("Could not download list of projects.");
