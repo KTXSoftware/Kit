@@ -1,4 +1,0 @@
-[submodule "node_modules/git"]
-	path = node_modules/git
-	url = ../kit-git
-	branch = master
