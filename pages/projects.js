@@ -108,9 +108,9 @@ function loadRepositories(table) {
 			data += chunk;
 		});
 		res.on("end", function() {
-			var a = 3;
-			++a;
-			addProjects(findProjectDirs(JSON.parse(data)), table);
+			var repositories = JSON.parse(data);
+			repositories.sort(function(a, b) { return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1; });
+			addProjects(findProjectDirs(repositories), table);
 		});
 	}).on("error", function(e) {
 		log.error("Could not download list of projects.");
