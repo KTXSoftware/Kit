@@ -1,5 +1,7 @@
 "use strict";
 
+var uuid = require("node-uuid");
+
 var document = window.document;
 
 function clear(element) {

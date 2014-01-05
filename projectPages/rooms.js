@@ -1,5 +1,7 @@
 "use strict";
 
+var uuid = require("node-uuid");
+
 var document = window.document;
 
 var roomsColumn;
@@ -121,14 +123,6 @@ function addRoom(kha, room, td) {
 	td.appendChild(a);
 }
 
-function s4() {
-	return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-}
-
-function guid() {
-	return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-}
-
 exports.load = function(repository, kha, element) {
 	var table = document.createElement("table");
 	var tr = document.createElement("tr");
@@ -146,7 +140,7 @@ exports.load = function(repository, kha, element) {
 
 	button.onclick = function() {
 		let room = {
-			id : guid(),
+			id : uuid.v4(),
 			name: input.value,
 			parent: null,
 			neighbours: [],
