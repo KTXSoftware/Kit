@@ -1,5 +1,7 @@
 "use strict";
 
+var config = require("../config.js");
+var fs = require("fs");
 var uuid = require("node-uuid");
 
 var document = window.document;
@@ -55,6 +57,11 @@ function loadAssets(assets, type, element) {
 	element.appendChild(table);
 }
 
+function copyFile(from, to) {
+	var data = fs.readFileSync(from);
+	fs.writeFileSync(to, data);
+}
+
 exports.load = function(repository, kha, element) {
 	var select = document.createElement("select");
 
@@ -101,7 +108,39 @@ exports.load = function(repository, kha, element) {
 	button.appendChild(document.createTextNode("Add Image..."));
 	button.setAttribute("type", "file");
 	button.onchange = function() {
-
+		var dir = "/Assets/"
+		switch (select.selectedIndex) {
+		case 0:
+			dir += "Graphics/";
+			break;
+		case 1:
+		case 2:
+			dir += "Sound/";
+			break;
+		}
+		var value = button.value.replace(/\\/g, "/");
+		var name = value.substr(value.lastIndexOf("/") + 1);
+		copyFile(value, config.projectsDirectory() + "/" + repository + dir + name);
+		var shortname = name.substring(0, name.lastIndexOf("."));
+		var type = "image";
+		switch (select.selectedIndex) {
+		case 1:
+			type = "music";
+			break;
+		case 2:
+			type = "sound";
+			break;
+		case 3:
+			type = "blob";
+			break;
+		}
+		kha.assets.push( {
+			id: uuid.v4(),
+      		type: type,
+      		file: name,
+      		name: shortname
+		});
+		loadAssets(kha.assets, type, div);
 	};
 	element.appendChild(button);
 	element.appendChild(div);
