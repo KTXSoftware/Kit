@@ -18,7 +18,7 @@ function remove(array, at) {
 	return array.push.apply(array, rest);
 }
 
-function loadAssets(assets, type, element) {
+function loadAssets(kha, assets, type, element) {
 	clear(element);
 	var table = document.createElement("table");
 	for (var asset in assets) {
@@ -44,6 +44,7 @@ function loadAssets(assets, type, element) {
 				for (var asset in assets) {
 					if (assets[asset].type === type && assets[asset].name === current.name) {
 						remove(assets, assets.indexOf(assets[asset]));
+						kha.save();
 						loadAssets(assets, type, element);
 						return;
 					}
@@ -140,12 +141,13 @@ exports.load = function(repository, kha, element) {
       		file: name,
       		name: shortname
 		});
+		kha.save();
 		loadAssets(kha.assets, type, div);
 	};
 	element.appendChild(button);
 	element.appendChild(div);
 
 	if (kha !== undefined) {
-		loadAssets(kha.assets, "image", div);
+		loadAssets(kha, kha.assets, "image", div);
 	}
 }

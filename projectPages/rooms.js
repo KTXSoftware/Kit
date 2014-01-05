@@ -53,6 +53,7 @@ function addLine(kha, room, asset, table) {
 	button.appendChild(document.createTextNode("-"));
 	button.onclick = function() {
 		remove(room, asset, table, line);
+		kha.save();
 		loadRoom(kha, room);
 	};
 	td.appendChild(button);
@@ -86,6 +87,7 @@ function loadAssets(kha, room, type, title, table) {
 	select.onchange = function() {
 		var value = select.options[select.selectedIndex].value;
 		room.assets.push(value);
+		kha.save();
 		loadRoom(kha, room);
 	};
 	
@@ -147,6 +149,7 @@ exports.load = function(repository, kha, element) {
 			assets: []
 		};
 		kha.rooms.push(room);
+		kha.save();
 		addRoom(kha, room, td);
 	};
 

@@ -16,6 +16,10 @@ function clear(element) {
 exports.load = function(repository) {
 	if (fs.existsSync(config.projectsDirectory() + "/" + repository + "/project.kha")) {
 		var kha = JSON.parse(fs.readFileSync(config.projectsDirectory() + "/" + repository + "/project.kha", {encoding: "utf8"}));
+		kha.save = function() {
+			var string = JSON.stringify(kha, null, "\t");
+			fs.writeFileSync(config.projectsDirectory() + "/" + repository + "/project.kha", string, {encoding: "utf8"});
+		};
 	}
 
 	page.clear();
