@@ -1,6 +1,8 @@
 "use strict";
 
-var git = require("kit-git");
+//var git = require("kit-git");
+var os = require("os");
+var git = require("kit-git-" + os.platform());
 var fs = require("fs");
 var http = require("http");
 var https = require("https");
