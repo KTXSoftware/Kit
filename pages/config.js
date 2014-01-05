@@ -19,7 +19,7 @@ exports.load = function() {
 	page.clear();
 	var table = window.document.createElement("table");
 
-	var input = document.createElement("input");
+	/*var input = document.createElement("input");
 	input.onchange = function() {
 		config.setUsername(input.value);
 	};
@@ -31,7 +31,7 @@ exports.load = function() {
 		config.setPassword(md5(input2.value));
 	}
 	table.appendChild(createRow2(document.createTextNode("Password"), input2));
-
+	*/
 	var projectsDirButton = document.createElement("input");
 	projectsDirButton.setAttribute("type", "file");
 	projectsDirButton.setAttribute("nwdirectory");
@@ -39,13 +39,26 @@ exports.load = function() {
 		config.setProjectsDirectory(projectsDirButton.value);
 	}
 	table.appendChild(createRow2(document.createTextNode("Projects directory"), projectsDirButton));
-	table.appendChild(createRow2(document.createTextNode("MP3 encoder"), document.createTextNode("_")));
-	table.appendChild(createRow2(document.createTextNode("AAC encoder"), document.createTextNode("_")));
-	table.appendChild(createRow2(document.createTextNode("Android Devkit"), document.createTextNode("_")));
-	table.appendChild(createRow2(document.createTextNode("Visual Studio"), document.createTextNode("_")));
-	table.appendChild(createRow2(document.createTextNode("Windows Graphics"), document.createTextNode("_")));
-	table.appendChild(createRow2(document.createTextNode("Precompiled Headers"), document.createTextNode("_")));
-	table.appendChild(createRow2(document.createTextNode("Intermediate Drive"), document.createTextNode("_")));
+
+	var input = document.createElement("input");
+	input.value = config.mp3Encoder();
+	input.onchange = function() {
+		config.setMP3Encoder(input.value);
+	};
+	table.appendChild(createRow2(document.createTextNode("MP3 encoder"), input));
+
+	var input2 = document.createElement("input");
+	input2.value = config.aacEncoder();
+	input2.onchange = function() {
+		config.setAACEncoder(input2.value);
+	}
+	table.appendChild(createRow2(document.createTextNode("AAC encoder"), input2));
+
+	//table.appendChild(createRow2(document.createTextNode("Android Devkit"), document.createTextNode("_")));
+	//table.appendChild(createRow2(document.createTextNode("Visual Studio"), document.createTextNode("_")));
+	//table.appendChild(createRow2(document.createTextNode("Windows Graphics"), document.createTextNode("_")));
+	//table.appendChild(createRow2(document.createTextNode("Precompiled Headers"), document.createTextNode("_")));
+	//table.appendChild(createRow2(document.createTextNode("Intermediate Drive"), document.createTextNode("_")));
 	
 	var content = document.getElementById("content");
 	content.appendChild(table);
