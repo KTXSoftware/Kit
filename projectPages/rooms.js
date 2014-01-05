@@ -109,6 +109,26 @@ function loadRoom(kha, room) {
 	roomsColumn.appendChild(table);
 }
 
+function addRoom(kha, room, td) {
+	td.appendChild(document.createElement("br"));
+	var a = document.createElement("a");
+	a.setAttribute("href", "#");
+	a.onclick = function() {
+		loadRoom(kha, room);
+		return false;
+	};
+	a.appendChild(document.createTextNode(room.name));
+	td.appendChild(a);
+}
+
+function s4() {
+	return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+}
+
+function guid() {
+	return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+}
+
 exports.load = function(repository, kha, element) {
 	var table = document.createElement("table");
 	var tr = document.createElement("tr");
@@ -124,17 +144,21 @@ exports.load = function(repository, kha, element) {
 	button.appendChild(document.createTextNode("Add room"));
 	td.appendChild(button);
 
+	button.onclick = function() {
+		let room = {
+			id : guid(),
+			name: input.value,
+			parent: null,
+			neighbours: [],
+			assets: []
+		};
+		kha.rooms.push(room);
+		addRoom(kha, room, td);
+	};
+
 	if (kha !== undefined) {
 		for (let room in kha.rooms) {
-			td.appendChild(document.createElement("br"));
-			var a = document.createElement("a");
-			a.setAttribute("href", "#");
-			a.onclick = function() {
-				loadRoom(kha, kha.rooms[room]);
-				return false;
-			};
-			a.appendChild(document.createTextNode(kha.rooms[room].name));
-			td.appendChild(a);
+			addRoom(kha, kha.rooms[room], td);
 		}
 	}
 
