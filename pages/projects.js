@@ -135,6 +135,62 @@ exports.load = function() {
 	var table = document.createElement("table");
 	var content = document.getElementById("content");
 	content.appendChild(table);
+
+	var tr = document.createElement("tr");
+	var td = document.createElement("td");
+	var input = document.createElement("input");
+	td.appendChild(input);
+	tr.appendChild(td);
+	td = document.createElement("td");
+	var button = document.createElement("button");
+	button.appendChild(document.createTextNode("Create project"));
+	td.appendChild(button);
+	tr.appendChild(td);
+	//table.appendChild(tr);
+
+	button.onclick = function() {
+		fs.mkdirSync(config.projectsDirectory() + "/" + input.value);
+
+		fs.writeFileSync(
+			config.projectsDirectory() + "/" + input.value + "/.gitignore",
+			"/build\n/kake.lua\n"
+		);
+		
+		fs.writeFileSync(
+			config.projectsDirectory() + "/" + input.value + "/project.kha",
+			JSON.stringify({ format: 1, game: { name: input.value, width: 640, height: 480}, assets: [], rooms: []}, null, "\t")
+		);
+		
+		fs.mkdirSync(config.projectsDirectory() + "/" + input.value + "/Sources");
+			
+		fs.writeFileSync(
+			config.projectsDirectory() + "/" + input.value + "/Sources/Main.hx",
+			"package;\n\n"
+			+ "import kha.Starter;\n\n"
+			+ "class Main {\n"
+			+ "\tpublic static function main() {\n"
+			+ "\t\tnew Starter().start(new " + input.value + "());\n"
+			+ "\t}\n"
+			+ "}"
+		);	
+		
+		fs.writeFileSync(
+			config.projectsDirectory() + "/" + input.value + "/Sources/" + input.value + ".hx",
+			"package;\n\n"
+			+ "import kha.Game;\n\n"
+			+ "class " + input.value + " extends Game {\n"
+			+ "\tpublic function new() {\n"
+			+ "\t\tsuper(\"" + input.value + "\", false);"
+			+ "\t}"
+			+ "}"
+		);
+		
+		fs.writeFileSync(
+			config.projectsDirectory() + "/" + input.value + "/.gitmodules",
+			'[submodule "Kha"]\n\tpath = Kha\n\turl = ../Kha\n\tbranch = master'
+		);
+	};
+
 	loadRepositories(table);
 }
 
