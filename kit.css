@@ -6,6 +6,11 @@ html, body {
 	font-size: 14px;
 }
 
+a:active {color: #ff0000; text-decoration: none}
+a:link {color: #a00000; text-decoration: none}
+a:visited {color: #a00000; text-decoration: none}
+a:hover {color: #a00000; text-decoration: none}
+
 div.kit {
 	display: table;
 	width: 100%;
