@@ -69,26 +69,36 @@ function addProjects(projects, table) {
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
+		let button = null;
 		if (projects[project].available) {
-			var button = new Button("Update");
+			button = new Button("Update");
 		}
 		else {
-			var button = new Button("Download");
-			
+			button = new Button("Download");
 		}
 		button.element.onclick = function() {
-			git.update(projects[project].project, "https://github.com/KTXSoftware/", config.projectsDirectory() + "/", function() { window.alert("done"); });
+			document.getElementById("kitt").style.visibility = "visible";
+			kittanimated = true;
+			animate();
+			git.update(projects[project].project, "https://github.com/KTXSoftware/", config.projectsDirectory() + "/",
+				function() {
+					document.getElementById("kitt").style.visibility = "hidden";
+					kittanimated = false;
+					button.element.removeChild(button.element.lastChild);
+					button.element.appendChild(document.createTextNode("Update"));
+				}
+			);
 		};
 		td.appendChild(button.element);
 		tr.appendChild(td);
 
 		td = document.createElement("td");
-		var button = new Button("Open");
-		button.element.onclick = function() {
+		var openButton = new Button("Open");
+		openButton.element.onclick = function() {
 			projectPage.load(projects[project].project);
 		};
-		if (!projects[project].available) button.element.disabled = true;
-		td.appendChild(button.element);
+		if (!projects[project].available) openButton.element.disabled = true;
+		td.appendChild(openButton.element);
 		tr.appendChild(td);
 
 		table.appendChild(tr);
@@ -126,4 +136,29 @@ exports.load = function() {
 	var content = document.getElementById("content");
 	content.appendChild(table);
 	loadRepositories(table);
+}
+
+var kittx = 0;
+var kittleft = false;
+var kittanimated = false;
+
+function animate() {
+	var kitt = document.getElementById("kitt");
+	var kittspeed = 5;
+	if (kittleft) {
+		kittx -= kittspeed;
+	}
+	else {
+		kittx += kittspeed;
+	}
+	if (kittx > window.innerWidth - 100) {
+		kittleft = true;
+		kittx = window.innerWidth - 100;
+	}
+	if (kittx < 0) {
+		kittleft = false;
+		kittx = 0;
+	}
+	if (kitt !== null) kitt.style.left = kittx + "px";
+	if (kittanimated) window.requestAnimationFrame(animate);
 }

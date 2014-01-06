@@ -14,22 +14,26 @@ div.kit {
 
 div.top {
 	display: table-row;
+	background-image: linear-gradient(to bottom, rgb(87, 89, 92) 0%, rgb(32, 32, 32) 100%);
 }
 
 div.topmenu {
 	display: table;
+	width: 100%;
 }
 
 div.topmenu2 {
 	display: table-row;
+	width: 100%;
 }
 
 div.topleft {
-	display: table-row;
+	display: table-cell;
 }
 
 div.topright {
-	display: table-row;
+	display: table-cell;
+	text-align: right;
 }
 
 div.center {
@@ -46,6 +50,17 @@ div.bottom {
 	display: table-row;
 	text-align: center;
 	vertical-align: middle;
+	height: 20px;
+	background-image: linear-gradient(to bottom, rgb(32, 32, 32) 0%, rgb(5, 5, 5) 50%, rgb(32, 32, 32) 100%);
+}
+
+div.kitt {
+	background-image: -webkit-radial-gradient(50px 10px, farthest-corner, rgb(255, 0, 0) 0%, rgba(5, 5, 5, 0) 80%);
+	width: 100px;
+	height: 20px;
+	vertical-align: middle;
+	visibility: hidden;
+	position: relative;
 }
 
 button {
