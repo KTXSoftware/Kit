@@ -87,16 +87,16 @@ exports.load = function(repository, kha, element) {
 	select.onchange = function() {
 		switch (select.selectedIndex) {
 		case 0:
-			loadAssets(kha.assets, "image", div);
+			loadAssets(kha, kha.assets, "image", div);
 			break;
 		case 1:
-			loadAssets(kha.assets, "music", div);
+			loadAssets(kha, kha.assets, "music", div);
 			break;
 		case 2:
-			loadAssets(kha.assets, "sound", div);
+			loadAssets(kha, kha.assets, "sound", div);
 			break;
 		case 3:
-			loadAssets(kha.assets, "blob", div);
+			loadAssets(kha, kha.assets, "blob", div);
 			break;
 		}
 	};
