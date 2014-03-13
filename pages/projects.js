@@ -33,7 +33,13 @@ function contains(array, value) {
 
 function findProjectDirs(repositories) {
 	var projects = [];
-	var dirs = fs.readdirSync(config.projectsDirectory());
+	var dirs = [];
+	try {
+		dirs = fs.readdirSync(config.projectsDirectory());
+	}
+	catch (e) {
+		
+	}
 	if (repositories !== undefined) {
 		for (var repo in repositories) {
 			if (repositories[repo] === null
