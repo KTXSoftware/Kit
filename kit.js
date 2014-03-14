@@ -12,4 +12,5 @@ window.onload = function() {
 	document.getElementById("projectsButton").onclick = projectsPage.load;
 	document.getElementById("configButton").onclick = configPage.load;
 	document.getElementById("logButton").onclick = logPage.load;
+	require('./git.js').init(document.getElementById('kittinfo'));
 }

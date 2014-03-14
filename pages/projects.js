@@ -221,6 +221,9 @@ function animate() {
 		kittleft = false;
 		kittx = 0;
 	}
-	if (kitt !== null) kitt.style.left = kittx + "px";
+	if (kitt !== null) {
+		kitt.style.top = window.innerHeight - 20 + 'px';
+		kitt.style.left = kittx + 'px';
+	}
 	if (kittanimated) window.requestAnimationFrame(animate);
 }
