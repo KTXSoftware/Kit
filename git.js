@@ -66,8 +66,8 @@ function findSubmodules(dir, callback) {
 	});
 }
 
-function clone(project, baseurl, dir, subdir, projectsDir, specials, callback) {
-	spawnGit(['clone', '--depth', '50', '--progress', baseurl + project, dir + subdir], dir, function (code, std) {
+function clone(project, branch, baseurl, dir, subdir, projectsDir, specials, callback) {
+	spawnGit(['clone', '--depth', '50', '-b', branch, '--progress', baseurl + project, dir + subdir], dir, function (code, std) {
 		spawnGit(['submodule', 'init'], dir + subdir, function (code, std) {
 			findSubmodules(dir + subdir, function (submodules) {
 				if (submodules.length === 0) {
@@ -79,11 +79,11 @@ function clone(project, baseurl, dir, subdir, projectsDir, specials, callback) {
 					baseurl += subdir + '/';
 				}
 				for (var s in submodules) {
-					var submodule = submodules[s];
-					var url = submodule.url.substr(3);
+					let submodule = submodules[s];
+					let url = submodule.url.substr(3);
 					if (specials && (url === 'Kha' || url === 'Kore')) {
 						exports.update(url, baseurl, projectsDir, function () {
-							clone(url, projectsDir, dir + subdir + '/', submodule.path, projectsDir, false, function () {
+							clone(url, submodule.branch, projectsDir, dir + subdir + '/', submodule.path, projectsDir, false, function () {
 								--subcount;
 								if (subcount == 0) {
 									callback();
@@ -92,7 +92,7 @@ function clone(project, baseurl, dir, subdir, projectsDir, specials, callback) {
 						});
 					}
 					else {
-						clone(baseurl.startsWith('http') ? url : submodule.path, baseurl, dir + subdir + '/', submodule.path, projectsDir, specials, function () {
+						clone(baseurl.startsWith('http') ? url : submodule.path, submodule.branch, baseurl, dir + subdir + '/', submodule.path, projectsDir, specials, function () {
 							--subcount;
 							if (subcount == 0) {
 								callback();
@@ -114,8 +114,8 @@ function pull(project, baseurl, projectsDir, dir, specials, callback) {
 			}
 			var subcount = submodules.length;
 			for (var s in submodules) {
-				var submodule = submodules[s];
-				var url = submodule.url.substr(3);
+				let submodule = submodules[s];
+				let url = submodule.url.substr(3);
 				if (specials && (url === 'Kha' || url === 'Kore')) {
 					pull(url, baseurl, projectsDir, projectsDir + url, false, function () {
 						pull(url, baseurl, projectsDir, dir + '/' + submodule.path, false, function () {
@@ -152,7 +152,7 @@ exports.update = function(project, baseurl, projectsDir, callback) {
 			});
 		}
 		else {
-			clone(project, baseurl, projectsDir, project, projectsDir, project !== 'Kha' && project !== 'Kore', function() {
+			clone(project, "master", baseurl, projectsDir, project, projectsDir, project !== 'Kha' && project !== 'Kore', function() {
 				kitt.innerHTML = '';
 				callback();
 			});
