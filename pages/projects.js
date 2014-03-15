@@ -117,13 +117,43 @@ function addProjects(projects, table) {
 }
 
 function loadRepositories(table) {
+	/*var options = {
+		rejectUnauthorized: false,
+		host: 'url',
+		path: '/rpc?req=LIST_REPOSITORIES',
+		headers: {
+			'User-Agent': 'RobDangerous',
+			'Authorization': 'Basic ' + new Buffer('user:pass').toString('base64')
+		}
+	};
+	https.get(options, function (res) {
+		log.info('Downloading list of projects.');
+		res.setEncoding('utf8');
+		let data = '';
+		res.on('data', function (chunk) {
+			data += chunk;
+		});
+		res.on('end', function() {
+			var repositories = JSON.parse(data);
+			var repos = [];
+			for (var r in repositories) {
+				var repo = repositories[r];
+				repos.push({name: repo.name.substr(0, repo.name.length - 4)});
+			}
+			repos.sort(function (a, b) { return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1; });
+			addProjects(findProjectDirs(repos), table);
+		});
+	}).on('error', function (e) {
+		log.error('Could not download list of projects.');
+		addProjects(findProjectDirs(), table);
+	});*/
+
 	var options = {
 		host: "api.github.com",
 		path: "/orgs/ktxsoftware/repos",
 		headers: {"User-Agent": "RobDangerous"},
 	};
 	https.get(options, function(res) {
-	//http.get("http://dev.ktxsoftware.com/kit.json?username=" + config.username() + "&password=" + config.password(), function(res) {
 		log.info("Downloaded list of projects.");
 		res.setEncoding("utf8");
 		let data = "";
