@@ -82,6 +82,17 @@ function addProjects(projects, table) {
 		else {
 			button = new Button("Download");
 		}
+		
+		td.appendChild(button.element);
+		tr.appendChild(td);
+
+		td = document.createElement("td");
+		let openButton = new Button("Open");
+		
+		openButton.element.onclick = function() {
+			projectPage.load(projects[project].project);
+		};
+
 		button.element.onclick = function() {
 			document.getElementById("kitt").style.visibility = "visible";
 			kittanimated = true;
@@ -92,17 +103,11 @@ function addProjects(projects, table) {
 					kittanimated = false;
 					button.element.removeChild(button.element.lastChild);
 					button.element.appendChild(document.createTextNode("Update"));
+					openButton.element.disabled = false;
 				}
 			);
 		};
-		td.appendChild(button.element);
-		tr.appendChild(td);
 
-		td = document.createElement("td");
-		var openButton = new Button("Open");
-		openButton.element.onclick = function() {
-			projectPage.load(projects[project].project);
-		};
 		if (!projects[project].available) openButton.element.disabled = true;
 		td.appendChild(openButton.element);
 		tr.appendChild(td);
