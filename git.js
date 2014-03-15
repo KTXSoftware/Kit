@@ -105,20 +105,37 @@ function clone(project, baseurl, dir, subdir, projectsDir, specials, callback) {
 	});
 }
 
-function pull(project, baseurl, projectsDir, callback) {
-	var process = spawn('git', ['pull', '--progress'], {cwd: projectsDir + project});
-
-	process.stdout.on('data', function (data) {
-		log.info(data);
-	});
-
-	process.stderr.on('data', function (data) {
-		kittMessage(data);
-	});
-
-	process.on('close', function (code) {
-		kitt.innerHTML = '';
-		callback();
+function pull(project, baseurl, projectsDir, dir, specials, callback) {
+	spawnGit(['pull', '--progress'], dir, function () {
+		findSubmodules(dir, function (submodules) {
+			if (submodules.length === 0) {
+				callback();
+				return;
+			}
+			var subcount = submodules.length;
+			for (var s in submodules) {
+				var submodule = submodules[s];
+				var url = submodule.url.substr(3);
+				if (specials && (url === 'Kha' || url === 'Kore')) {
+					pull(url, baseurl, projectsDir, projectsDir + url, false, function () {
+						pull(url, baseurl, projectsDir, dir + '/' + submodule.path, false, function () {
+							--subcount;
+							if (subcount == 0) {
+								callback();
+							}
+						});
+					});
+				}
+				else {
+					pull(url, baseurl, projectsDir, dir + '/' + submodule.path, specials, function () {
+						--subcount;
+						if (subcount == 0) {
+							callback();
+						}
+					});
+				}
+			}
+		});
 	});
 }
 
@@ -129,7 +146,10 @@ exports.init = function(kitty) {
 exports.update = function(project, baseurl, projectsDir, callback) {
 	fs.stat(projectsDir + project, function(err, stats) {
 		if (!err && stats.isDirectory()) {
-			pull(project, baseurl, projectsDir, callback);
+			pull(project, baseurl, projectsDir, projectsDir + project, project !== 'Kha' && project !== 'Kore', function () {
+				kitt.innerHTML = '';
+				callback();
+			});
 		}
 		else {
 			clone(project, baseurl, projectsDir, project, projectsDir, project !== 'Kha' && project !== 'Kore', function() {
