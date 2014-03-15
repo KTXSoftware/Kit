@@ -66,7 +66,7 @@ function findSubmodules(dir, callback) {
 	});
 }
 
-function clone(project, baseurl, dir, subdir, callback) {
+function clone(project, baseurl, dir, subdir, projectsDir, specials, callback) {
 	spawnGit(['clone', '--depth', '50', '--progress', baseurl + project, dir + subdir], dir, function (code, std) {
 		spawnGit(['submodule', 'init'], dir + subdir, function (code, std) {
 			findSubmodules(dir + subdir, function (submodules) {
@@ -75,33 +75,34 @@ function clone(project, baseurl, dir, subdir, callback) {
 					return;
 				}
 				var subcount = submodules.length;
+				if (!baseurl.startsWith('http')) {
+					baseurl += subdir + '/';
+				}
 				for (var s in submodules) {
 					var submodule = submodules[s];
-					clone(submodule.url.substr(3), baseurl, dir + subdir + '/', submodule.path, function() {
-						--subcount;
-						if (subcount == 0) {
-							callback();
-						}
-					});
+					var url = submodule.url.substr(3);
+					if (specials && (url === 'Kha' || url === 'Kore')) {
+						exports.update(url, baseurl, projectsDir, function () {
+							clone(url, projectsDir, dir + subdir + '/', submodule.path, projectsDir, false, function () {
+								--subcount;
+								if (subcount == 0) {
+									callback();
+								}
+							});
+						});
+					}
+					else {
+						clone(baseurl.startsWith('http') ? url : submodule.path, baseurl, dir + subdir + '/', submodule.path, projectsDir, specials, function () {
+							--subcount;
+							if (subcount == 0) {
+								callback();
+							}
+						});
+					}
 				}
 			});
 		});
 	});
-
-	/*var process = spawn('git', ['submodule', 'update', '--depth', '50', '--init', '--recursive'], {cwd: dir + project});
-
-	process.stdout.on('data', function (data) {
-		log.info(data);
-	});
-
-	process.stderr.on('data', function (data) {
-		kittMessage(data);
-	});
-
-	process.on('close', function (code) {
-		kitt.innerHTML = '';
-		callback();
-	});*/
 }
 
 function pull(project, baseurl, projectsDir, callback) {
@@ -131,7 +132,7 @@ exports.update = function(project, baseurl, projectsDir, callback) {
 			pull(project, baseurl, projectsDir, callback);
 		}
 		else {
-			clone(project, baseurl, projectsDir, project, function() {
+			clone(project, baseurl, projectsDir, project, projectsDir, project !== 'Kha' && project !== 'Kore', function() {
 				kitt.innerHTML = '';
 				callback();
 			});
