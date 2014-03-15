@@ -39,32 +39,47 @@ function spawnGit(parameters, dir, callback) {
 }
 
 function findSubmodules(dir, callback) {
-	spawnGit(['submodule', 'status'], dir, function (code, std) {
-		var submodules = [];
-		var lines = std.split(/\r?\n/);
-		for (var line in lines) {
-			if (lines[line] === '') continue;
-			var submodule = lines[line].substr(42);
-			if (submodule.contains(' ')) {
-				submodule = submodule.substr(0, submodule.lastIndexOf(' '));
-			}
-			submodules.push(submodule);
+	fs.readFile(dir + '/.gitmodules', {encoding: 'utf-8'}, function (err, data) {
+		if (err) {
+			callback([]);
+			return;
 		}
+		var submodules = [];
+		var submodule = null;
+		var lines = data.split(/\r?\n/);
+		for (var l in lines) {
+			var line = lines[l].trim();
+			if (line === '') continue;
+			if (line.startsWith('[')) {
+				if (submodule !== null) submodules.push(submodule);
+				submodule = {};
+			}
+			else {
+				var parts = line.split(/=/);
+				var first = parts[0].trim();
+				var second = parts[1].trim();
+				submodule[first] = second;
+			}
+		}
+		if (submodule !== null) submodules.push(submodule);
 		callback(submodules);
 	});
 }
 
-function clone(project, baseurl, dir, callback) {
-	spawnGit(['clone', '--depth', '50', '--progress', baseurl + project, dir + project], dir, function (code, std) {
-		spawnGit(['submodule', 'init'], dir + project, function (code, std) {
-			findSubmodules(dir + project, function (submodules) {
+function clone(project, baseurl, dir, subdir, callback) {
+	spawnGit(['clone', '--depth', '50', '--progress', baseurl + project, dir + subdir], dir, function (code, std) {
+		spawnGit(['submodule', 'init'], dir + subdir, function (code, std) {
+			findSubmodules(dir + subdir, function (submodules) {
+				if (submodules.length === 0) {
+					callback();
+					return;
+				}
 				var subcount = submodules.length;
 				for (var s in submodules) {
 					var submodule = submodules[s];
-					clone(submodule, baseurl, dir + project + '/', function() {
+					clone(submodule.url.substr(3), baseurl, dir + subdir + '/', submodule.path, function() {
 						--subcount;
 						if (subcount == 0) {
-							kitt.innerHTML = '';
 							callback();
 						}
 					});
@@ -116,7 +131,10 @@ exports.update = function(project, baseurl, projectsDir, callback) {
 			pull(project, baseurl, projectsDir, callback);
 		}
 		else {
-			clone(project, baseurl, projectsDir, callback);
+			clone(project, baseurl, projectsDir, project, function() {
+				kitt.innerHTML = '';
+				callback();
+			});
 		}
 	});	
 };
