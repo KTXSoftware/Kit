@@ -20,8 +20,58 @@ function kittMessage(data) {
 	kitt.innerHTML = data;
 }
 
+function spawnGit(parameters, dir, callback) {
+	var process = spawn('git', parameters, {cwd: dir});
+	var std = '';
+	
+	process.stdout.on('data', function (data) {
+		std += data;
+		log.info(data);
+	});
+
+	process.stderr.on('data', function (data) {
+		kittMessage(data);
+	});
+
+	process.on('close', function (code) {
+		callback(code, std);
+	});
+}
+
+function findSubmodules(dir, callback) {
+	spawnGit(['submodule', 'status'], dir, function (code, std) {
+		var submodules = [];
+		var lines = std.split(/\r?\n/);
+		for (var line in lines) {
+			if (lines[line] === '') continue;
+			var submodule = lines[line].substr(42);
+			if (submodule.contains(' ')) {
+				submodule = submodule.substr(0, submodule.lastIndexOf(' '));
+			}
+			submodules.push(submodule);
+		}
+		callback(submodules);
+	});
+}
+
 function clone(project, baseurl, projectsDir, callback) {
-	var process = spawn('git', ['clone', '--depth', '50', '--progress', baseurl + project, projectsDir + project]);
+	spawnGit(['clone', '--depth', '50', '--progress', baseurl + project, projectsDir + project], projectsDir, function (code, std) {
+		findSubmodules(projectsDir + project, function (submodules) {
+			var subcount = submodules.length;
+			for (var s in submodules) {
+				var submodule = submodules[s];
+				spawnGit(['clone', '--depth', '50', '--progress', baseurl + submodule, projectsDir + project + '/' + submodule], projectsDir, function (code, std) {
+					--subcount;
+					if (subcount == 0) {
+						kitt.innerHTML = '';
+						callback();
+					}
+				});
+			}
+		});
+	});
+
+	/*var process = spawn('git', ['submodule', 'update', '--depth', '50', '--init', '--recursive'], {cwd: projectsDir + project});
 
 	process.stdout.on('data', function (data) {
 		log.info(data);
@@ -32,21 +82,9 @@ function clone(project, baseurl, projectsDir, callback) {
 	});
 
 	process.on('close', function (code) {
-		var process = spawn('git', ['submodule', 'update', '--depth', '50', '--init', '--recursive'], {cwd: projectsDir + project});
-
-		process.stdout.on('data', function (data) {
-			log.info(data);
-		});
-
-		process.stderr.on('data', function (data) {
-			kittMessage(data);
-		});
-
-		process.on('close', function (code) {
-			kitt.innerHTML = '';
-			callback();
-		});
-	});
+		kitt.innerHTML = '';
+		callback();
+	});*/
 }
 
 function pull(project, baseurl, projectsDir, callback) {
