@@ -54,24 +54,26 @@ function findSubmodules(dir, callback) {
 	});
 }
 
-function clone(project, baseurl, projectsDir, callback) {
-	spawnGit(['clone', '--depth', '50', '--progress', baseurl + project, projectsDir + project], projectsDir, function (code, std) {
-		findSubmodules(projectsDir + project, function (submodules) {
-			var subcount = submodules.length;
-			for (var s in submodules) {
-				var submodule = submodules[s];
-				spawnGit(['clone', '--depth', '50', '--progress', baseurl + submodule, projectsDir + project + '/' + submodule], projectsDir, function (code, std) {
-					--subcount;
-					if (subcount == 0) {
-						kitt.innerHTML = '';
-						callback();
-					}
-				});
-			}
+function clone(project, baseurl, dir, callback) {
+	spawnGit(['clone', '--depth', '50', '--progress', baseurl + project, dir + project], dir, function (code, std) {
+		spawnGit(['submodule', 'init'], dir + project, function (code, std) {
+			findSubmodules(dir + project, function (submodules) {
+				var subcount = submodules.length;
+				for (var s in submodules) {
+					var submodule = submodules[s];
+					clone(submodule, baseurl, dir + project + '/', function() {
+						--subcount;
+						if (subcount == 0) {
+							kitt.innerHTML = '';
+							callback();
+						}
+					});
+				}
+			});
 		});
 	});
 
-	/*var process = spawn('git', ['submodule', 'update', '--depth', '50', '--init', '--recursive'], {cwd: projectsDir + project});
+	/*var process = spawn('git', ['submodule', 'update', '--depth', '50', '--init', '--recursive'], {cwd: dir + project});
 
 	process.stdout.on('data', function (data) {
 		log.info(data);
