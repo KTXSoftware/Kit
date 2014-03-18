@@ -67,7 +67,7 @@ function findSubmodules(dir, callback) {
 }
 
 function clone(project, branch, baseurl, dir, subdir, projectsDir, specials, callback) {
-	spawnGit(['clone', '--depth', '50', '-b', branch, '--progress', baseurl + project, dir + subdir], dir, function (code, std) {
+	spawnGit(['clone', '-b', branch, '--progress', baseurl + project, dir + subdir], dir, function (code, std) {
 		spawnGit(['submodule', 'init'], dir + subdir, function (code, std) {
 			findSubmodules(dir + subdir, function (submodules) {
 				if (submodules.length === 0) {
