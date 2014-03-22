@@ -12,5 +12,11 @@ window.onload = function() {
 	document.getElementById("projectsButton").onclick = projectsPage.load;
 	document.getElementById("configButton").onclick = configPage.load;
 	document.getElementById("logButton").onclick = logPage.load;
+	document.getElementById('reloadButton').onclick = function () {
+		require('nw.gui').Window.get().reload(3);
+	};
+	document.getElementById('devButton').onclick = function () {
+		require('nw.gui').Window.get().showDevTools();
+	};
 	require('./git.js').init(document.getElementById('kittinfo'));
 }
