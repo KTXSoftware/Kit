@@ -42,14 +42,14 @@ exports.load = function() {
 
 	var input = document.createElement("input");
 	input.value = config.mp3Encoder();
-	input.onchange = function() {
+	input.onkeyup = function() {
 		config.setMP3Encoder(input.value);
 	};
 	table.appendChild(createRow2(document.createTextNode("MP3 encoder"), input));
 
 	var input2 = document.createElement("input");
 	input2.value = config.aacEncoder();
-	input2.onchange = function() {
+	input2.onkeyup = function() {
 		config.setAACEncoder(input2.value);
 	}
 	table.appendChild(createRow2(document.createTextNode("AAC encoder"), input2));

@@ -117,58 +117,69 @@ function addProjects(projects, table) {
 }
 
 function loadRepositories(table) {
-	/*var options = {
-		rejectUnauthorized: false,
-		host: 'url',
-		path: '/rpc?req=LIST_REPOSITORIES',
-		headers: {
-			'User-Agent': 'RobDangerous',
-			'Authorization': 'Basic ' + new Buffer('user:pass').toString('base64')
-		}
-	};
-	https.get(options, function (res) {
-		log.info('Downloading list of projects.');
-		res.setEncoding('utf8');
-		let data = '';
-		res.on('data', function (chunk) {
-			data += chunk;
-		});
-		res.on('end', function() {
-			var repositories = JSON.parse(data);
-			var repos = [];
-			for (var r in repositories) {
-				var repo = repositories[r];
-				repos.push({name: repo.name.substr(0, repo.name.length - 4)});
-			}
+	let repos = [];
+	let servercount = config.servers().length;
+
+	function finishRepositories() {
+		--servercount;
+		if (servercount === 0) {
 			repos.sort(function (a, b) { return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1; });
 			addProjects(findProjectDirs(repos), table);
-		});
-	}).on('error', function (e) {
-		log.error('Could not download list of projects.');
-		addProjects(findProjectDirs(), table);
-	});*/
+		}
+	}
 
-	var options = {
-		host: "api.github.com",
-		path: "/orgs/ktxsoftware/repos",
-		headers: {"User-Agent": "RobDangerous"},
-	};
-	https.get(options, function(res) {
-		log.info("Downloaded list of projects.");
-		res.setEncoding("utf8");
-		let data = "";
-		res.on("data", function(chunk) {
-			data += chunk;
+	for (var s in config.servers()) {
+		let server = config.servers()[s];
+
+		let options = {};
+		if (server.type === 'github') {
+			options = {
+				host: 'api.github.com',
+				path: '/' + server.path + '/repos',
+				headers: {'User-Agent': 'Kit'},
+			};
+		}
+		else if (server.type === 'gitblit') {
+			options = {
+				rejectUnauthorized: false,
+				host: server.url,
+				path: '/rpc?req=LIST_REPOSITORIES',
+				headers: {
+					'User-Agent': 'Kit',
+					'Authorization': 'Basic ' + new Buffer(server.user + ':' + server.pass).toString('base64')
+				}
+			};
+		}
+
+		https.get(options, function(res) {
+			log.info("Downloaded list of projects.");
+			res.setEncoding("utf8");
+			let data = "";
+			res.on("data", function(chunk) {
+				data += chunk;
+			});
+			res.on("end", function() {
+				if (server.type === 'github') {
+					var repositories = JSON.parse(data);
+					for (var r in repositories) {
+						repos.push(repositories[r]);
+					}
+					finishRepositories();
+				}
+				else if (server.type === 'gitblit') {
+					var repositories = JSON.parse(data);
+					for (var r in repositories) {
+						var repo = repositories[r];
+						repos.push({name: repo.name.substr(0, repo.name.length - 4)});
+					}
+					finishRepositories();
+				}
+			});
+		}).on("error", function(e) {
+			log.error("Could not download list of projects.");
+			addProjects(findProjectDirs(), table);
 		});
-		res.on("end", function() {
-			var repositories = JSON.parse(data);
-			repositories.sort(function(a, b) { return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1; });
-			addProjects(findProjectDirs(repositories), table);
-		});
-	}).on("error", function(e) {
-		log.error("Could not download list of projects.");
-		addProjects(findProjectDirs(), table);
-	});
+	}
 }
 
 exports.load = function() {

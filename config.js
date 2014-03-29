@@ -1,52 +1,72 @@
-var localStorage = window.localStorage;
+var fs      = require('fs');
+var path    = require('path');
 
-var username = localStorage.getItem("username");
-var password = localStorage.getItem("password");
-var projectsDirectory = localStorage.getItem("projectsDirectory");
-var mp3encoder = localStorage.getItem("mp3encoder");
-var aacencoder = localStorage.getItem("aacencoder");
+var options = {
+	version: 1,
+	projectsDirectory: '',
+	mp3encoder: '',
+	aacencoder: '',
+	servers: [
+		{
+			type: 'github',
+			path: 'orgs/ktxsoftware'
+		}
+	]
+};
 
-exports.username = function() {
-	return username;
+var filename;
+
+function load() {
+	try {
+		options = JSON.parse(fs.readFileSync(filename, {encoding: 'utf8'}));
+	}
+	catch (e) {
+		var localStorage = window.localStorage;
+		options.projectsDirectory = localStorage.getItem('projectsDirectory');
+		options.mp3encoder = localStorage.getItem('mp3encoder');
+		options.aacencoder = localStorage.getItem('aacencoder');
+	}	
 }
 
-exports.password = function() {
-	return password;
+function save() {
+	fs.writeFile(filename, JSON.stringify(options, null, '\t'), {encoding: 'utf8'}, function (err) {
+
+	});
+}
+
+load();
+
+exports.init = function (dataPath) {
+	filename = dataPath + path.sep + 'options.json';
 }
 
 exports.projectsDirectory = function() {
-	return projectsDirectory;
+	return options.projectsDirectory;
 }
 
 exports.mp3Encoder = function() {
-	return mp3encoder;
+	return options.mp3encoder;
 }
 
 exports.aacEncoder = function() {
-	return aacencoder;
+	return options.aacencoder;
 }
 
-exports.setUsername = function(text) {
-	username = text;
-	localStorage.setItem("username", username);
-}
-
-exports.setPassword = function(text) {
-	password = text;
-	localStorage.setItem("password", password);
+exports.servers = function () {
+	return options.servers;
 }
 
 exports.setProjectsDirectory = function(dir) {
-	projectsDirectory = dir;
-	localStorage.setItem("projectsDirectory", projectsDirectory);
+	options.projectsDirectory = dir;
+	save();
 }
 
 exports.setMP3Encoder = function(text) {
-	mp3encoder = text;
-	localStorage.setItem("mp3encoder", mp3encoder);
+	options.mp3encoder = text;
+	save();
 }
 
 exports.setAACEncoder = function(text) {
-	aacencoder = text;
-	localStorage.setItem("aacencoder", aacencoder);
+	options.aacencoder = text;
+	save();
 }
