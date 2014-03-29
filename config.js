@@ -34,10 +34,9 @@ function save() {
 	});
 }
 
-load();
-
 exports.init = function (dataPath) {
 	filename = dataPath + path.sep + 'options.json';
+	load();
 }
 
 exports.projectsDirectory = function() {
