@@ -54,6 +54,13 @@ exports.load = function() {
 	}
 	table.appendChild(createRow2(document.createTextNode("AAC encoder"), input2));
 
+	var input3 = document.createElement("input");
+	input3.value = config.git();
+	input3.onkeyup = function() {
+		config.setGit(input3.value);
+	}
+	table.appendChild(createRow2(document.createTextNode("Git command"), input3));
+
 	//table.appendChild(createRow2(document.createTextNode("Android Devkit"), document.createTextNode("_")));
 	//table.appendChild(createRow2(document.createTextNode("Visual Studio"), document.createTextNode("_")));
 	//table.appendChild(createRow2(document.createTextNode("Windows Graphics"), document.createTextNode("_")));

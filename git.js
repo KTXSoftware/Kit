@@ -1,5 +1,6 @@
 "use strict";
 
+var config = require('./config.js');
 var fs = require('fs');
 var path = require('path');
 var spawn = require('child_process').spawn;
@@ -22,7 +23,7 @@ function kittMessage(data) {
 }
 
 function spawnGit(parameters, dir, callback) {
-	var process = spawn('git', parameters, {cwd: dir});
+	var process = spawn(config.git(), parameters, {cwd: dir});
 	var std = '';
 	
 	process.stdout.on('data', function (data) {
@@ -151,13 +152,13 @@ exports.init = function(kitty) {
 exports.update = function(repo, repos, projectsDir, callback) {
 	fs.stat(projectsDir + repo.name, function(err, stats) {
 		if (!err && stats.isDirectory()) {
-			pull(projectsDir, projectsDir + repo.name, !isSpecial(repo.name), function () {
+			pull(projectsDir, projectsDir + repo.name, !isSpecial(repo.name) && repo.name.indexOf('/') === -1, function () {
 				kitt.innerHTML = '';
 				callback();
 			});
 		}
 		else {
-			clone(repo, repos, "master", null, projectsDir, repo.name, projectsDir, !isSpecial(repo.name), function() {
+			clone(repo, repos, "master", null, projectsDir, repo.name, projectsDir, !isSpecial(repo.name) && repo.name.indexOf('/') === -1, function() {
 				kitt.innerHTML = '';
 				callback();
 			});

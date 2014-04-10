@@ -7,6 +7,7 @@ var options = {
 	mp3encoder: '',
 	aacencoder: '',
 	hideUnavailable: false,
+	git: 'git',
 	servers: [
 		{
 			type: 'github',
@@ -21,6 +22,7 @@ function load() {
 	try {
 		options = JSON.parse(fs.readFileSync(filename, {encoding: 'utf8'}));
 		if (options.hideUnavailable === undefined) options.hideUnavailable = false;
+		if (options.git === undefined) options.git = 'git';
 	}
 	catch (e) {
 		var localStorage = window.localStorage;
@@ -61,6 +63,10 @@ exports.hideUnavailable = function () {
 	return options.hideUnavailable;
 }
 
+exports.git = function () {
+	return options.git;
+}
+
 exports.setProjectsDirectory = function (dir) {
 	options.projectsDirectory = dir;
 	save();
@@ -78,5 +84,10 @@ exports.setAACEncoder = function (text) {
 
 exports.setHideUnavailable = function (hide) {
 	options.hideUnavailable = hide;
+	save();
+}
+
+exports.setGit = function (git) {
+	options.git = git;
 	save();
 }
