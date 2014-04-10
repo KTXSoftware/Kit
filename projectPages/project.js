@@ -1,4 +1,5 @@
 var cp = require("child_process");
+var fs = require('fs');
 var os = require("os");
 var config = require("../config.js");
 
@@ -43,6 +44,16 @@ function getSystem(select) {
 	}
 }
 
+function open(file) {
+	if (os.platform() === 'linux') { }
+	else if (os.platform() === 'win32') {
+		cp.spawn('cmd', ['/c', 'start', '""', file]);
+	}
+	else {
+		cp.spawn('open', [file]);
+	}
+}
+
 exports.load = function(repository, kha, element) {
 	var select = document.createElement("select");
 	addOption(select, "Flash");
@@ -61,14 +72,6 @@ exports.load = function(repository, kha, element) {
 	addOption(select, "Java");
 	element.appendChild(select);
 
-	/*var button = document.createElement("button");
-	button.appendChild(document.createTextNode("Compile Assets"));
-	element.appendChild(button);
-
-	button = document.createElement("button");
-	button.appendChild(document.createTextNode("Launch Project"));
-	element.appendChild(button);*/
-
 	var button = document.createElement("button");
 	button.appendChild(document.createTextNode("Create"));
 	element.appendChild(button);
@@ -81,11 +84,49 @@ exports.load = function(repository, kha, element) {
 		exe = "hake.exe";
 	}
 
-	button.onclick = function() {
-		cp.spawn(config.projectsDirectory() + "/" + repository + "/Kha/Tools/hake/" + exe,
-		[getSystem(select), "mp3=" + config.mp3Encoder(), "aac=" + config.aacEncoder()],
-		{
-			cwd: config.projectsDirectory() + "/" + repository
+	function create(callback) {
+		var child = cp.spawn(config.projectsDirectory() + "/" + repository + "/Kha/Tools/hake/" + exe,
+			[getSystem(select), "mp3=" + config.mp3Encoder(), "aac=" + config.aacEncoder()],
+			{ cwd: config.projectsDirectory() + "/" + repository});
+		child.on('close', callback);
+	}
+
+	button.onclick = function () {
+		create(function () { });
+	};
+
+	var launchButton = document.createElement('button');
+	launchButton.appendChild(document.createTextNode('Launch IDE'));
+	element.appendChild(launchButton);
+
+	launchButton.onclick = function () {
+		create(function () {
+			open(config.projectsDirectory() + '/' + repository + '/build/project-' + getSystem(select) + '.hxproj');
+
+			var projectName = config.projectsDirectory();
+			if (fs.existsSync(config.projectsDirectory() + '/' + repository + '/project.kha')) {
+				var kha = JSON.parse(fs.readFileSync(config.projectsDirectory() + '/' + repository + '/project.kha', {encoding: 'utf8'}));
+				projectName = kha.game.name;
+			}
+
+			switch (getSystem(select)) {
+			case 'windows':
+			case 'windowsrt':
+				var projectFile = config.projectsDirectory() + '/' + repository + '/build/' + projectName + '.sln';
+				if (!fs.existsSync(projectFile)) projectFile = config.projectsDirectory() + '/' + repository + '/build/' + getSystem(select) + '-build/' + projectName + '.sln';
+				open(projectFile);
+				break;
+			case 'osx':
+			case 'ios':
+				var projectFile = config.projectsDirectory() + '/' + repository + '/build/' + projectName + '.xcodeproj';
+				if (!fs.existsSync(projectFile)) projectFile = config.projectsDirectory() + '/' + repository + '/build/' + getSystem(select) + '-build' + projectName + '.xcodeproj';
+				open(projectFile);
+				break;
+			case 'wpf':
+			case 'xna':
+				open(config.projectsDirectory() + '/' + repository + '/build/' + getSystem(select) + '-build/Project.sln');
+				break;
+			}
 		});
 	};
 }
