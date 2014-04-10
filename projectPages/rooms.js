@@ -84,7 +84,12 @@ function loadAssets(kha, room, type, title, table) {
 		}
 	}
 
-	select.onchange = function() {
+	select.onfocus = function () {
+		select.selectedIndex = -1;
+	};
+
+	select.onchange = function () {
+		if (select.selectedIndex < 0) return;
 		var value = select.options[select.selectedIndex].value;
 		room.assets.push(value);
 		kha.save();
