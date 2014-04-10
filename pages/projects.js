@@ -327,27 +327,15 @@ exports.load = function() {
 	loadRepositories();
 };
 
-var kittx = 0;
-var kittleft = false;
+var kittcount = 0;
 var kittanimated = false;
 
 function animate() {
 	var kitt = document.getElementById("kitt");
-	var kittspeed = 5;
-	if (kittleft) {
-		kittx -= kittspeed;
-	}
-	else {
-		kittx += kittspeed;
-	}
-	if (kittx > window.innerWidth - 100) {
-		kittleft = true;
-		kittx = window.innerWidth - 100;
-	}
-	if (kittx < 0) {
-		kittleft = false;
-		kittx = 0;
-	}
+
+	++kittcount;
+	var kittx = (Math.sin(kittcount / 100) + 1) / 2 * (window.innerWidth - 100);
+
 	if (kitt !== null) {
 		kitt.style.top = window.innerHeight - 20 + 'px';
 		kitt.style.left = kittx + 'px';
