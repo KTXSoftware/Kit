@@ -65,6 +65,23 @@ function findProjectDirs(projects) {
 			|| fs.existsSync(config.projectsDirectory() + "/" + dirs[dir] + "/Kha")) {
 			projects[dirs[dir]] = {name: dirs[dir], project: dirs[dir], available: true};
 		}
+		else {
+			var dirs2 = [];
+			try {
+				dirs2 = fs.readdirSync(config.projectsDirectory() + '/' + dirs[dir]);
+				for (var d in dirs2) {
+					var dir2 = dirs2[d];
+					if (fs.existsSync(config.projectsDirectory() + "/" + dirs[dir] + '/' + dir2 + "/Kore")
+						|| fs.existsSync(config.projectsDirectory() + "/" + dirs[dir] + '/' + dir2 + "/Kt")
+						|| fs.existsSync(config.projectsDirectory() + "/" + dirs[dir] + '/' + dir2 + "/Kha")) {
+						projects[dirs[dir] + '/' + dir2] = {name: dirs[dir] + '/' + dir2, project: dirs[dir] + '/' + dir2, available: true};
+					}
+				}
+			}
+			catch (e) {
+				
+			}		
+		}
 	}
 }
 
