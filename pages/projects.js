@@ -31,8 +31,7 @@ function contains(array, value) {
 	return false;
 }
 
-function findProjectDirs(repositories) {
-	var projects = [];
+function findProjectDirs(projects) {
 	var dirs = [];
 	try {
 		dirs = fs.readdirSync(config.projectsDirectory());
@@ -40,43 +39,51 @@ function findProjectDirs(repositories) {
 	catch (e) {
 		
 	}
-	if (repositories !== undefined) {
-		for (var repo in repositories) {
-			if (repositories[repo] === null
-				|| repositories[repo].name.endsWith("/")
-				|| repositories[repo].name.startsWith("Archive/")
-				) continue;
+	for (var p in projects) {
+		var project = projects[p];
+		if (project === null
+			|| project.name.endsWith("/")
+			|| project.name.startsWith("Archive/")
+			) {
+			delete projects[p];
+			continue;
+		}
 
-			if (contains(dirs, repositories[repo].name)) {
-				remove(dirs, dirs.indexOf(repositories[repo].name));
-				projects.push({project: repositories[repo].name, available: true});
-			}
-			else {
-				projects.push({project: repositories[repo].name, available: false});
-			}
+		if (contains(dirs, project.name)) {
+			remove(dirs, dirs.indexOf(project.name));
+			project.available = true;
+		}
+		else {
+			project.available = false;
 		}
 	}
 	for (var dir in dirs) {
 		if (fs.existsSync(config.projectsDirectory() + "/" + dirs[dir] + "/Kore")
 			|| fs.existsSync(config.projectsDirectory() + "/" + dirs[dir] + "/Kt")
 			|| fs.existsSync(config.projectsDirectory() + "/" + dirs[dir] + "/Kha")) {
-			projects.push({project: dirs[dir], available: true});
+			projects[dirs[dir]] = {name: dirs[dir], project: dirs[dir], available: true};
 		}
 	}
-	return projects;
 }
 
 function addProjects(projects, table) {
-	for (let project in projects) {
+	var repoarray = [];
+	for (var p in projects) {
+		repoarray.push(projects[p]);
+	}
+	repoarray.sort(function (a, b) { return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1; });
+
+	for (let r in repoarray) {
+		let project = repoarray[r];
 		var tr = document.createElement("tr");
 
 		var td = document.createElement("td");
-		td.appendChild(document.createTextNode(projects[project].project));
+		td.appendChild(document.createTextNode(project.name));
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
 		let button = null;
-		if (projects[project].available) {
+		if (project.available) {
 			button = new Button("Update");
 		}
 		else {
@@ -90,14 +97,14 @@ function addProjects(projects, table) {
 		let openButton = new Button("Open");
 		
 		openButton.element.onclick = function() {
-			projectPage.load(projects[project].project);
+			projectPage.load(project.name);
 		};
 
 		button.element.onclick = function() {
 			document.getElementById("kitt").style.visibility = "visible";
 			kittanimated = true;
 			animate();
-			git.update(projects[project].project, "https://github.com/KTXSoftware/", config.projectsDirectory() + "/",
+			git.update(project, projects, config.projectsDirectory() + "/",
 				function() {
 					document.getElementById("kitt").style.visibility = "hidden";
 					kittanimated = false;
@@ -108,7 +115,7 @@ function addProjects(projects, table) {
 			);
 		};
 
-		if (!projects[project].available) openButton.element.disabled = true;
+		if (!project.available) openButton.element.disabled = true;
 		td.appendChild(openButton.element);
 		tr.appendChild(td);
 
@@ -116,27 +123,89 @@ function addProjects(projects, table) {
 	}
 }
 
-function loadRepositories(table) {
-	let repos = [];
-	let servercount = config.servers().length;
+var serverCount;
 
-	function finishRepositories() {
-		--servercount;
-		if (servercount === 0) {
-			repos.sort(function (a, b) { return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1; });
-			addProjects(findProjectDirs(repos), table);
+function finishServer(repos, table) {
+	--serverCount;
+	if (serverCount === 0) {
+		log.info("Downloaded list of projects.");
+		findProjectDirs(repos);
+		addProjects(repos, table);
+	}
+}
+
+function getServerInfo(res, repos, server, serverPrio, table) {
+	if (res.headers.link !== undefined) {
+		//<https://api.github.com/resource?page=2>; rel="next",
+		let links = res.headers.link.split(/,/);
+		for (let l in links) {
+			let link = links[l];
+			let components = link.split(/;/);
+			if (components[1].trim() === 'rel="next"') {
+				let url = components[0].substr(1, components[0].length - 2).substr(8);
+				let cut = url.indexOf('/');
+				let options = {
+					host: url.substr(0, cut),
+					path: url.substr(cut),
+					headers: {'User-Agent': 'Kit'}
+				};
+				++serverCount;
+				https.get(options, function (res) { getServerInfo(res, repos, server, serverPrio, table); }).on("error", function(e) {
+					log.error("Could not load additional projects data.");
+				});;
+				break;
+			}
 		}
 	}
 
+	res.setEncoding("utf8");
+	let data = "";
+	res.on("data", function(chunk) {
+		data += chunk;
+	});
+	res.on("end", function() {
+		if (server.type === 'github') {
+			var repositories = JSON.parse(data);
+			for (var r in repositories) {
+				//repos.push(repositories[r]);
+				let name = repositories[r].name.trim();
+				if (repos[name] === undefined || repos[name].prio < serverPrio) {
+					repos[name] = {name: name, server: server, prio: serverPrio, baseurl: 'https://github.com/' + server.path.split(/\//)[1] + '/'};
+				}
+			}
+			finishServer(repos, table);
+		}
+		else if (server.type === 'gitblit') {
+			var repositories = JSON.parse(data);
+			for (var r in repositories) {
+				var repo = repositories[r];
+				//repos.push({name: repo.name.substr(0, repo.name.length - 4)});
+				let name = repo.name.substr(0, repo.name.length - 4).trim();
+				if (repos[name] === undefined || repos[name].prio < serverPrio) {
+					repos[name] = {name: name, server: server, prio: serverPrio, baseurl: 'https://' + server.url + '/r/'};
+				}
+			}
+			finishServer(repos, table);
+		}
+	});
+}
+
+function loadRepositories(table) {
+	let repos = {};
+	serverCount = config.servers().length;
+
+	let serverNum = 0;
 	for (var s in config.servers()) {
 		let server = config.servers()[s];
+		let serverPrio = serverNum;
+		++serverNum;
 
 		let options = {};
 		if (server.type === 'github') {
 			options = {
 				host: 'api.github.com',
 				path: '/' + server.path + '/repos',
-				headers: {'User-Agent': 'Kit'},
+				headers: {'User-Agent': 'Kit'}
 			};
 		}
 		else if (server.type === 'gitblit') {
@@ -151,33 +220,11 @@ function loadRepositories(table) {
 			};
 		}
 
-		https.get(options, function(res) {
-			log.info("Downloaded list of projects.");
-			res.setEncoding("utf8");
-			let data = "";
-			res.on("data", function(chunk) {
-				data += chunk;
-			});
-			res.on("end", function() {
-				if (server.type === 'github') {
-					var repositories = JSON.parse(data);
-					for (var r in repositories) {
-						repos.push(repositories[r]);
-					}
-					finishRepositories();
-				}
-				else if (server.type === 'gitblit') {
-					var repositories = JSON.parse(data);
-					for (var r in repositories) {
-						var repo = repositories[r];
-						repos.push({name: repo.name.substr(0, repo.name.length - 4)});
-					}
-					finishRepositories();
-				}
-			});
-		}).on("error", function(e) {
-			log.error("Could not download list of projects.");
-			addProjects(findProjectDirs(), table);
+		https.get(options, function (res) { getServerInfo(res, repos, server, serverPrio, table); }).on("error", function(e) {
+			log.info("Could not download list of projects.");
+			let repos = {};
+			findProjectDirs(repos);
+			addProjects(repos, table);
 		});
 	}
 }

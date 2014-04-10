@@ -1,6 +1,7 @@
 "use strict";
 
 var fs = require('fs');
+var path = require('path');
 var spawn = require('child_process').spawn;
 var log = require('./log.js');
 var kitt = null;
@@ -66,24 +67,28 @@ function findSubmodules(dir, callback) {
 	});
 }
 
-function clone(project, branch, baseurl, dir, subdir, projectsDir, specials, callback) {
-	spawnGit(['clone', '-b', branch, '--progress', baseurl + project, dir + subdir], dir, function (code, std) {
+function isSpecial(name) {
+	return name === 'Kha' || name === 'Kore';
+}
+
+function clone(repo, repos, branch, baseurl, dir, subdir, projectsDir, specials, callback) {
+	spawnGit(['clone', '-b', branch, '--progress', baseurl === null ? repos[repo.name].baseurl + repo.name : path.relative(dir, baseurl + repo.path), dir + subdir], dir, function (code, std) {
 		spawnGit(['submodule', 'init'], dir + subdir, function (code, std) {
 			findSubmodules(dir + subdir, function (submodules) {
 				if (submodules.length === 0) {
 					callback();
 					return;
 				}
-				var subcount = submodules.length;
-				if (!baseurl.startsWith('http')) {
+				let subcount = submodules.length;
+				if (baseurl !== null) {
 					baseurl += subdir + '/';
 				}
-				for (var s in submodules) {
+				for (let s in submodules) {
 					let submodule = submodules[s];
 					let url = submodule.url.substr(3);
-					if (specials && (url === 'Kha' || url === 'Kore')) {
-						exports.update(url, baseurl, projectsDir, function () {
-							clone(url, submodule.branch, projectsDir, dir + subdir + '/', submodule.path, projectsDir, false, function () {
+					if (specials && isSpecial(url)) {
+						exports.update(repos[url], repos, projectsDir, function () {
+							clone({path: url}, repos, submodule.branch, projectsDir, dir + subdir + '/', submodule.path, projectsDir, false, function () {
 								--subcount;
 								if (subcount == 0) {
 									callback();
@@ -92,7 +97,7 @@ function clone(project, branch, baseurl, dir, subdir, projectsDir, specials, cal
 						});
 					}
 					else {
-						clone(baseurl.startsWith('http') ? url : submodule.path, submodule.branch, baseurl, dir + subdir + '/', submodule.path, projectsDir, specials, function () {
+						clone(baseurl === null ? repos[url] : {path: submodule.path}, repos, submodule.branch, baseurl, dir + subdir + '/', submodule.path, projectsDir, specials, function () {
 							--subcount;
 							if (subcount == 0) {
 								callback();
@@ -105,20 +110,20 @@ function clone(project, branch, baseurl, dir, subdir, projectsDir, specials, cal
 	});
 }
 
-function pull(project, baseurl, projectsDir, dir, specials, callback) {
+function pull(projectsDir, dir, specials, callback) {
 	spawnGit(['pull', '--progress'], dir, function () {
 		findSubmodules(dir, function (submodules) {
 			if (submodules.length === 0) {
 				callback();
 				return;
 			}
-			var subcount = submodules.length;
-			for (var s in submodules) {
+			let subcount = submodules.length;
+			for (let s in submodules) {
 				let submodule = submodules[s];
 				let url = submodule.url.substr(3);
-				if (specials && (url === 'Kha' || url === 'Kore')) {
-					pull(url, baseurl, projectsDir, projectsDir + url, false, function () {
-						pull(url, baseurl, projectsDir, dir + '/' + submodule.path, false, function () {
+				if (specials && isSpecial(url)) {
+					pull(projectsDir, projectsDir + url, false, function () {
+						pull(projectsDir, dir + '/' + submodule.path, false, function () {
 							--subcount;
 							if (subcount == 0) {
 								callback();
@@ -127,7 +132,7 @@ function pull(project, baseurl, projectsDir, dir, specials, callback) {
 					});
 				}
 				else {
-					pull(url, baseurl, projectsDir, dir + '/' + submodule.path, specials, function () {
+					pull(projectsDir, dir + '/' + submodule.path, specials, function () {
 						--subcount;
 						if (subcount == 0) {
 							callback();
@@ -143,16 +148,16 @@ exports.init = function(kitty) {
 	kitt = kitty;
 }
 
-exports.update = function(project, baseurl, projectsDir, callback) {
-	fs.stat(projectsDir + project, function(err, stats) {
+exports.update = function(repo, repos, projectsDir, callback) {
+	fs.stat(projectsDir + repo.name, function(err, stats) {
 		if (!err && stats.isDirectory()) {
-			pull(project, baseurl, projectsDir, projectsDir + project, project !== 'Kha' && project !== 'Kore', function () {
+			pull(projectsDir, projectsDir + repo.name, !isSpecial(repo.name), function () {
 				kitt.innerHTML = '';
 				callback();
 			});
 		}
 		else {
-			clone(project, "master", baseurl, projectsDir, project, projectsDir, project !== 'Kha' && project !== 'Kore', function() {
+			clone(repo, repos, "master", null, projectsDir, repo.name, projectsDir, !isSpecial(repo.name), function() {
 				kitt.innerHTML = '';
 				callback();
 			});
