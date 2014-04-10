@@ -66,15 +66,22 @@ function findProjectDirs(projects) {
 	}
 }
 
-function addProjects(projects, table) {
-	var repoarray = [];
-	for (var p in projects) {
-		repoarray.push(projects[p]);
-	}
-	repoarray.sort(function (a, b) { return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1; });
+var repoarray = [];
+var table;
 
+function clear(element) {
+	while (element.lastChild) {
+		element.removeChild(element.lastChild);
+	}
+}
+
+exports.redraw = function () {
+	clear(table);
 	for (let r in repoarray) {
 		let project = repoarray[r];
+
+		if (!project.available && config.hideUnavailable()) continue;
+
 		var tr = document.createElement("tr");
 
 		var td = document.createElement("td");
@@ -121,20 +128,30 @@ function addProjects(projects, table) {
 
 		table.appendChild(tr);
 	}
+};
+
+function addProjects(projects) {
+	repoarray = [];
+	for (var p in projects) {
+		repoarray.push(projects[p]);
+	}
+	repoarray.sort(function (a, b) { return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1; });
+
+	exports.redraw();
 }
 
 var serverCount;
 
-function finishServer(repos, table) {
+function finishServer(repos) {
 	--serverCount;
 	if (serverCount === 0) {
 		log.info("Downloaded list of projects.");
 		findProjectDirs(repos);
-		addProjects(repos, table);
+		addProjects(repos);
 	}
 }
 
-function getServerInfo(res, repos, server, serverPrio, table) {
+function getServerInfo(res, repos, server, serverPrio) {
 	if (res.headers.link !== undefined) {
 		//<https://api.github.com/resource?page=2>; rel="next",
 		let links = res.headers.link.split(/,/);
@@ -150,7 +167,7 @@ function getServerInfo(res, repos, server, serverPrio, table) {
 					headers: {'User-Agent': 'Kit'}
 				};
 				++serverCount;
-				https.get(options, function (res) { getServerInfo(res, repos, server, serverPrio, table); }).on("error", function(e) {
+				https.get(options, function (res) { getServerInfo(res, repos, server, serverPrio); }).on("error", function(e) {
 					log.error("Could not load additional projects data.");
 				});;
 				break;
@@ -173,7 +190,7 @@ function getServerInfo(res, repos, server, serverPrio, table) {
 					repos[name] = {name: name, server: server, prio: serverPrio, baseurl: 'https://github.com/' + server.path.split(/\//)[1] + '/'};
 				}
 			}
-			finishServer(repos, table);
+			finishServer(repos);
 		}
 		else if (server.type === 'gitblit') {
 			var repositories = JSON.parse(data);
@@ -185,12 +202,12 @@ function getServerInfo(res, repos, server, serverPrio, table) {
 					repos[name] = {name: name, server: server, prio: serverPrio, baseurl: 'https://' + server.url + '/r/'};
 				}
 			}
-			finishServer(repos, table);
+			finishServer(repos);
 		}
 	});
 }
 
-function loadRepositories(table) {
+function loadRepositories() {
 	let repos = {};
 	serverCount = config.servers().length;
 
@@ -220,18 +237,18 @@ function loadRepositories(table) {
 			};
 		}
 
-		https.get(options, function (res) { getServerInfo(res, repos, server, serverPrio, table); }).on("error", function(e) {
+		https.get(options, function (res) { getServerInfo(res, repos, server, serverPrio); }).on("error", function(e) {
 			log.info("Could not download list of projects.");
 			let repos = {};
 			findProjectDirs(repos);
-			addProjects(repos, table);
+			addProjects(repos);
 		});
 	}
 }
 
 exports.load = function() {
 	page.clear();
-	var table = document.createElement("table");
+	table = document.createElement("table");
 	var content = document.getElementById("content");
 	content.appendChild(table);
 
@@ -290,8 +307,8 @@ exports.load = function() {
 		);
 	};
 
-	loadRepositories(table);
-}
+	loadRepositories();
+};
 
 var kittx = 0;
 var kittleft = false;

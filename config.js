@@ -6,6 +6,7 @@ var options = {
 	projectsDirectory: '',
 	mp3encoder: '',
 	aacencoder: '',
+	hideUnavailable: false,
 	servers: [
 		{
 			type: 'github',
@@ -19,6 +20,7 @@ var filename;
 function load() {
 	try {
 		options = JSON.parse(fs.readFileSync(filename, {encoding: 'utf8'}));
+		if (options.hideUnavailable === undefined) options.hideUnavailable = false;
 	}
 	catch (e) {
 		var localStorage = window.localStorage;
@@ -39,15 +41,15 @@ exports.init = function (dataPath) {
 	load();
 }
 
-exports.projectsDirectory = function() {
+exports.projectsDirectory = function () {
 	return options.projectsDirectory;
 }
 
-exports.mp3Encoder = function() {
+exports.mp3Encoder = function () {
 	return options.mp3encoder;
 }
 
-exports.aacEncoder = function() {
+exports.aacEncoder = function () {
 	return options.aacencoder;
 }
 
@@ -55,17 +57,26 @@ exports.servers = function () {
 	return options.servers;
 }
 
-exports.setProjectsDirectory = function(dir) {
+exports.hideUnavailable = function () {
+	return options.hideUnavailable;
+}
+
+exports.setProjectsDirectory = function (dir) {
 	options.projectsDirectory = dir;
 	save();
 }
 
-exports.setMP3Encoder = function(text) {
+exports.setMP3Encoder = function (text) {
 	options.mp3encoder = text;
 	save();
 }
 
-exports.setAACEncoder = function(text) {
+exports.setAACEncoder = function (text) {
 	options.aacencoder = text;
+	save();
+}
+
+exports.setHideUnavailable = function (hide) {
+	options.hideUnavailable = hide;
 	save();
 }

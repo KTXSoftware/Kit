@@ -21,5 +21,11 @@ window.onload = function() {
 	document.getElementById("projectsButton").onclick = projectsPage.load;
 	document.getElementById("configButton").onclick = configPage.load;
 	document.getElementById("logButton").onclick = logPage.load;
+	var hidebox = document.getElementById('hideunavailable');
+	if (config.hideUnavailable()) hidebox.click();
+	hidebox.onclick = function () {
+		config.setHideUnavailable(hidebox.checked);
+		projectsPage.redraw();
+	};
 	require('./git.js').init(document.getElementById('kittinfo'));
 }
