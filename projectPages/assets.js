@@ -142,7 +142,7 @@ exports.load = function(repository, kha, element) {
       		name: shortname
 		});
 		kha.save();
-		loadAssets(kha.assets, type, div);
+		loadAssets(kha, kha.assets, type, div);
 	};
 	element.appendChild(button);
 	element.appendChild(div);
