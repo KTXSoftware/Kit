@@ -22,17 +22,60 @@ function kittMessage(data) {
 	kitt.innerHTML = data;
 }
 
-function spawnGit(parameters, dir, callback) {
+function findServer(data) {
+	data = data.toString();
+	data = data.substr(data.indexOf("'") + 1);
+	data = data.substr(0, data.indexOf("'"));
+	for (var s in config.servers()) {
+		var server = config.servers()[s];
+		if (server.type === 'github') {
+			if (data.contains('github.com')) return server;
+		}
+		else if (server.type === 'gitblit') {
+			if (data.contains(server.url)) return server;
+		}
+	}
+	return null;
+}
+
+function spawnGit(parameters, dir, callback, retrynum) {
+	if (retrynum === undefined) retrynum = 0;
+
+	var params = '';
+	for (var p in parameters) params += ' ' + parameters[p];
+
+	if (retrynum > 2) {
+		log.error('Git failed with parameters' + params);
+		return;
+	}
+
+	log.info('Calling git' + params);
+	
 	var process = spawn(config.git(), parameters, {cwd: dir});
+	process.stdin.setEncoding('utf8');
 	var std = '';
 	
 	process.stdout.on('data', function (data) {
+		/*if (data.toString().startsWith('Username for')) {
+			var server = findServer(data);
+			if (server !== null && server.user !== undefined) process.stdin.write(findServer(data).user + '\n');
+		}
+		if (data.toString().startsWith('Password for')) {
+			var server = findServer(data);
+			if (server !== null && server.pass !== undefined) process.stdin.write(findServer(data).pass + '\n');
+		}*/
+
 		std += data;
 		log.info(data);
 	});
 
 	process.stderr.on('data', function (data) {
 		kittMessage(data);
+	});
+
+	process.on('error', function (err) {
+  		log.info('Git retry');
+  		spawnGit(parameters, dir, callback, retrynum + 1);
 	});
 
 	process.on('close', function (code) {
@@ -87,6 +130,9 @@ function clone(repo, repos, branch, baseurl, dir, subdir, projectsDir, specials,
 				for (let s in submodules) {
 					let submodule = submodules[s];
 					let url = submodule.url.substr(3);
+					if (repo.name !== undefined && repo.name.lastIndexOf('/') !== -1) {
+						url = repo.name.substr(0, repo.name.lastIndexOf('/')) + '/' + url;
+					}
 					if (specials && isSpecial(url)) {
 						exports.update(repos[url], repos, projectsDir, function () {
 							clone({path: url}, repos, submodule.branch, projectsDir, dir + subdir + '/', submodule.path, projectsDir, false, function () {

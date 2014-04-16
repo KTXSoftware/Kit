@@ -13,6 +13,14 @@ var options = {
 			type: 'github',
 			path: 'orgs/ktxsoftware'
 		}
+		/*
+		{
+			"type": "gitblit",
+			"url": "git.ktxsoftware.com",
+			"user": "",
+			"pass": ""
+		}
+		*/
 	]
 };
 
