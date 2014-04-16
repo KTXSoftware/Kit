@@ -54,6 +54,19 @@ function open(file) {
 	}
 }
 
+var currentServer = null;
+
+function startServer(dir) {
+	var nstatic = require('node-static');
+	var file = new nstatic.Server(dir);
+	currentServer = require('http').createServer(function (request, response) {
+		request.addListener('end', function () {
+			file.serve(request, response);
+		}).resume();
+	});
+	currentServer.listen(8080);
+}
+
 exports.load = function(repository, kha, element) {
 	var select = document.createElement("select");
 	addOption(select, "Flash");
@@ -110,6 +123,16 @@ exports.load = function(repository, kha, element) {
 			}
 
 			switch (getSystem(select)) {
+			case 'html5':
+				if (currentServer !== null) {
+					currentServer.close(function () {
+						startServer(config.projectsDirectory() + '/' + repository + '/build/html5/');
+					});
+				}
+				else {
+					startServer(config.projectsDirectory() + '/' + repository + '/build/html5/');
+				}
+				break;
 			case 'windows':
 			case 'windowsrt':
 				var projectFile = config.projectsDirectory() + '/' + repository + '/build/' + projectName + '.sln';
