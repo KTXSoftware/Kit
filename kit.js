@@ -27,5 +27,5 @@ window.onload = function() {
 		config.setHideUnavailable(hidebox.checked);
 		projectsPage.redraw();
 	};
-	require('./git.js').init(document.getElementById('kittinfo'));
+	require('./git.js').init(document.getElementById('kittinfo'), process, gui.App.dataPath);
 }

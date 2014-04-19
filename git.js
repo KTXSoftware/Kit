@@ -6,6 +6,8 @@ var path = require('path');
 var spawn = require('child_process').spawn;
 var log = require('./log.js');
 var kitt = null;
+var dataPath = null;
+var myProcess = null;
 
 function kittMessage(data) {
 	var lastReturn = 0;
@@ -22,22 +24,6 @@ function kittMessage(data) {
 	kitt.innerHTML = data;
 }
 
-function findServer(data) {
-	data = data.toString();
-	data = data.substr(data.indexOf("'") + 1);
-	data = data.substr(0, data.indexOf("'"));
-	for (var s in config.servers()) {
-		var server = config.servers()[s];
-		if (server.type === 'github') {
-			if (data.contains('github.com')) return server;
-		}
-		else if (server.type === 'gitblit') {
-			if (data.contains(server.url)) return server;
-		}
-	}
-	return null;
-}
-
 function spawnGit(parameters, dir, callback, retrynum) {
 	if (retrynum === undefined) retrynum = 0;
 
@@ -51,20 +37,14 @@ function spawnGit(parameters, dir, callback, retrynum) {
 
 	log.info('Calling git' + params);
 	
-	var process = spawn(config.git(), parameters, {cwd: dir});
+	var env = myProcess.env;
+	env.GIT_ASKPASS = myProcess.cwd() + '/Kit/kitpass/kitpass.exe';
+	env.KIT_DATA_PATH = dataPath;
+	var process = spawn(config.git(), parameters, {cwd: dir, env: env});
 	process.stdin.setEncoding('utf8');
 	var std = '';
 	
 	process.stdout.on('data', function (data) {
-		/*if (data.toString().startsWith('Username for')) {
-			var server = findServer(data);
-			if (server !== null && server.user !== undefined) process.stdin.write(findServer(data).user + '\n');
-		}
-		if (data.toString().startsWith('Password for')) {
-			var server = findServer(data);
-			if (server !== null && server.pass !== undefined) process.stdin.write(findServer(data).pass + '\n');
-		}*/
-
 		std += data;
 		log.info(data);
 	});
@@ -191,8 +171,10 @@ function pull(projectsDir, dir, specials, callback) {
 	});
 }
 
-exports.init = function(kitty) {
-	kitt = kitty;
+exports.init = function(aKitt, aProcess, aDataPath) {
+	kitt = aKitt;
+	myProcess = aProcess;
+	dataPath = aDataPath;
 }
 
 exports.update = function(repo, repos, projectsDir, callback) {
