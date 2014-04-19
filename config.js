@@ -10,11 +10,13 @@ var options = {
 	git: 'git',
 	servers: [
 		{
+			name: 'ktx-github',
 			type: 'github',
 			path: 'orgs/ktxsoftware'
 		}
 		/*
 		{
+			"name": "ktx-gitblit"
 			"type": "gitblit",
 			"url": "git.ktxsoftware.com",
 			"user": "",
@@ -31,6 +33,10 @@ function load() {
 		options = JSON.parse(fs.readFileSync(filename, {encoding: 'utf8'}));
 		if (options.hideUnavailable === undefined) options.hideUnavailable = false;
 		if (options.git === undefined) options.git = 'git';
+		for (var s in options.servers) {
+			var server = options.servers[s];
+			if (server.name === undefined) server.name = 'ktx-github';
+		}
 	}
 	catch (e) {
 		var localStorage = window.localStorage;
