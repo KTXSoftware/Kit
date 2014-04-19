@@ -142,7 +142,7 @@ exports.load = function(repository, kha, element) {
 			case 'osx':
 			case 'ios':
 				var projectFile = config.projectsDirectory() + '/' + repository + '/build/' + projectName + '.xcodeproj';
-				if (!fs.existsSync(projectFile)) projectFile = config.projectsDirectory() + '/' + repository + '/build/' + getSystem(select) + '-build' + projectName + '.xcodeproj';
+				if (!fs.existsSync(projectFile)) projectFile = config.projectsDirectory() + '/' + repository + '/build/' + getSystem(select) + '-build/' + projectName + '.xcodeproj';
 				open(projectFile);
 				break;
 			case 'wpf':
