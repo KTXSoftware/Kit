@@ -4,6 +4,7 @@ var log = require("../log.js");
 var document = window.document;
 var table = null;
 var lastIndex = 0;
+var button;
 
 function createRow1(element) {
 	var tr = document.createElement("tr");
@@ -12,6 +13,10 @@ function createRow1(element) {
 	tr.appendChild(td);
 	return tr;
 }
+
+exports.init = function (logButton) {
+	button = logButton;
+};
 
 exports.update = function() {
 	if (table === null) return;
@@ -22,6 +27,7 @@ exports.update = function() {
 };
 
 exports.load = function() {
+	button.className = '';
 	page.clear();
 	table = document.createElement("table");
 

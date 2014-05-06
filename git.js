@@ -30,12 +30,7 @@ function spawnGit(parameters, dir, callback, retrynum) {
 	var params = '';
 	for (var p in parameters) params += ' ' + parameters[p];
 
-	if (retrynum > 2) {
-		log.error('Git failed with parameters' + params);
-		return;
-	}
-
-	log.info('Calling git' + params);
+	log.info('Calling git' + params + ' in ' + dir);
 	
 	var env = myProcess.env;
 	env.GIT_ASKPASS = myProcess.cwd() + '/Kit/kitpass/kitpass.exe';
@@ -54,12 +49,28 @@ function spawnGit(parameters, dir, callback, retrynum) {
 	});
 
 	process.on('error', function (err) {
-  		log.info('Git retry');
-  		spawnGit(parameters, dir, callback, retrynum + 1);
+		if (retrynum > 2) {
+			log.error('Git error with parameters' + params + ' in ' + dir);
+			callback(code, std);
+		}
+		else {
+			spawnGit(parameters, dir, callback, retrynum + 1);
+		}
 	});
 
 	process.on('close', function (code) {
-		callback(code, std);
+		if (code !== 0) {
+			if (retrynum > 2) {
+				log.error('Git error with parameters' + params + ' in ' + dir);
+				callback(code, std);
+			}
+			else {
+				spawnGit(parameters, dir, callback, retrynum + 1);
+			}
+		}
+		else {
+			callback(code, std);
+		}
 	});
 }
 
