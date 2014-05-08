@@ -205,8 +205,20 @@ function getServerInfo(res, server, serverPrio) {
 			var repositories = JSON.parse(data);
 			for (var r in repositories) {
 				let name = repositories[r].name.trim();
-				if (projects[name] === undefined || projects[name].prio < serverPrio) {
-					projects[name] = {name: name, server: server, prio: serverPrio, baseurl: 'https://github.com/' + server.path.split(/\//)[1] + '/'};
+				let project = {name: name, server: server, prio: serverPrio, baseurl: 'https://github.com/' + server.path.split(/\//)[1] + '/', others: []};
+				if (projects[name] === undefined) {
+					projects[name] = project;
+				}
+				else if (projects[name].prio < serverPrio) {
+					for (var o in projects[name].others) {
+						project.others.push(projects[name].others[o]);
+					}
+					projects[name].others = [];
+					project.others.push(projects[name]);
+					projects[name] = project;
+				}
+				else {
+					projects[name].others.push(project);
 				}
 			}
 			finishServer();
@@ -216,8 +228,20 @@ function getServerInfo(res, server, serverPrio) {
 			for (var r in repositories) {
 				var repo = repositories[r];
 				let name = repo.name.substr(0, repo.name.length - 4).trim();
-				if (projects[name] === undefined || projects[name].prio < serverPrio) {
-					projects[name] = {name: name, server: server, prio: serverPrio, baseurl: 'https://' + server.url + '/r/'};
+				let project = {name: name, server: server, prio: serverPrio, baseurl: 'https://' + server.url + '/r/', others: []};
+				if (projects[name] === undefined) {
+					projects[name] = project;
+				}
+				else if (projects[name].prio < serverPrio) {
+					for (var o in projects[name].others) {
+						project.others.push(projects[name].others[o]);
+					}
+					projects[name].others = [];
+					project.others.push(projects[name]);
+					projects[name] = project;
+				}
+				else {
+					projects[name].others.push(project);
 				}
 			}
 			finishServer();

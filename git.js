@@ -106,43 +106,74 @@ function isSpecial(name) {
 	return name === 'Kha' || name === 'Kore';
 }
 
+function addAllRemotes(remotes, dir, callback) {
+	var remote = remotes.pop();
+	spawnGit(['remote', 'add', remote.name, remote.url], dir, function (code, std) {
+		if (remotes.length === 0) callback();
+		else addAllRemotes(remotes, dir, callback);
+	});
+}
+
+function addRemotes(repo, dir, callback) {
+	if (repo.server !== undefined) {
+		var remotes = [];
+		remotes.push({name: repo.server.name, url: repo.baseurl + repo.name});
+		for (var o in repo.others) {
+			var other = repo.others[o];
+			remotes.push({name: other.server.name, url: other.baseurl + other.name});
+		}
+		addAllRemotes(remotes, dir, callback);
+	}
+	else callback();
+}
+
 function clone(repo, repos, branch, baseurl, dir, subdir, projectsDir, specials, callback) {
-	spawnGit(['clone', '-b', branch, '--progress', baseurl === null ? repos[repo.name].baseurl + repo.name : path.relative(dir, baseurl + repo.path), dir + subdir], dir, function (code, std) {
-		spawnGit(['submodule', 'init'], dir + subdir, function (code, std) {
-			findSubmodules(dir + subdir, function (submodules) {
-				if (submodules.length === 0) {
-					callback();
-					return;
-				}
-				let subcount = submodules.length;
-				if (baseurl !== null) {
-					baseurl += subdir + '/';
-				}
-				for (let s in submodules) {
-					let submodule = submodules[s];
-					let url = submodule.url.substr(3);
-					if (repo.name !== undefined && repo.name.lastIndexOf('/') !== -1) {
-						url = repo.name.substr(0, repo.name.lastIndexOf('/')) + '/' + url;
+	spawnGit(['clone', '-b', branch, '--progress', baseurl === null ? repo.baseurl + repo.name : path.relative(dir, baseurl + repo.path), dir + subdir], dir, function (code, std) {
+		addRemotes(repo, dir + subdir, function() {
+			spawnGit(['submodule', 'init'], dir + subdir, function (code, std) {
+				findSubmodules(dir + subdir, function (submodules) {
+					if (submodules.length === 0) {
+						callback();
+						return;
 					}
-					if (specials && isSpecial(url)) {
-						exports.update(repos[url], repos, projectsDir, function () {
-							clone({path: url}, repos, submodule.branch, projectsDir, dir + subdir + '/', submodule.path, projectsDir, false, function () {
+					let subcount = submodules.length;
+					if (baseurl !== null) {
+						baseurl += subdir + '/';
+					}
+					for (let s in submodules) {
+						let submodule = submodules[s];
+						let url = submodule.url.substr(3);
+						if (repo.name !== undefined && repo.name.lastIndexOf('/') !== -1) {
+							url = repo.name.substr(0, repo.name.lastIndexOf('/')) + '/' + url;
+						}
+						if (specials && isSpecial(url)) {
+							exports.update(repos[url], repos, projectsDir, function () {
+								let project = Object.create(repos[url]);
+								project.path = url;
+								clone(project, repos, submodule.branch, projectsDir, dir + subdir + '/', submodule.path, projectsDir, false, function () {
+									--subcount;
+									if (subcount == 0) {
+										callback();
+									}
+								});
+							});
+						}
+						else {
+							let project = null;
+							if (baseurl === null) project = repos[url];
+							else {
+								project = Object.create(repos[url]);
+								project.path = submodule.path;
+							}
+							clone(project, repos, submodule.branch, baseurl, dir + subdir + '/', submodule.path, projectsDir, specials, function () {
 								--subcount;
 								if (subcount == 0) {
 									callback();
 								}
 							});
-						});
+						}
 					}
-					else {
-						clone(baseurl === null ? repos[url] : {path: submodule.path}, repos, submodule.branch, baseurl, dir + subdir + '/', submodule.path, projectsDir, specials, function () {
-							--subcount;
-							if (subcount == 0) {
-								callback();
-							}
-						});
-					}
-				}
+				});
 			});
 		});
 	});
