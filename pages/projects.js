@@ -31,6 +31,12 @@ function contains(array, value) {
 	return false;
 }
 
+function isProject(name) {
+	return fs.existsSync(config.projectsDirectory() + "/" + name + "/Kore")
+		|| fs.existsSync(config.projectsDirectory() + "/" + name + "/Kt")
+		|| fs.existsSync(config.projectsDirectory() + "/" + name + "/Kha");
+}
+
 var projects = {};
 
 function findProjectDirs(projects) {
@@ -50,19 +56,12 @@ function findProjectDirs(projects) {
 			delete projects[p];
 			continue;
 		}
-
-		if (contains(dirs, project.name)) {
-			remove(dirs, dirs.indexOf(project.name));
-			project.available = true;
-		}
-		else {
-			project.available = false;
-		}
 	}
 	for (var dir in dirs) {
-		if (fs.existsSync(config.projectsDirectory() + "/" + dirs[dir] + "/Kore")
-			|| fs.existsSync(config.projectsDirectory() + "/" + dirs[dir] + "/Kt")
-			|| fs.existsSync(config.projectsDirectory() + "/" + dirs[dir] + "/Kha")) {
+		if (projects[dirs[dir]] !== undefined) {
+			projects[dirs[dir]].available = true;
+		}
+		else if (isProject(dirs[dir])) {
 			projects[dirs[dir]] = {name: dirs[dir], project: dirs[dir], available: true};
 		}
 		else {
@@ -71,10 +70,12 @@ function findProjectDirs(projects) {
 				dirs2 = fs.readdirSync(config.projectsDirectory() + '/' + dirs[dir]);
 				for (var d in dirs2) {
 					var dir2 = dirs2[d];
-					if (fs.existsSync(config.projectsDirectory() + "/" + dirs[dir] + '/' + dir2 + "/Kore")
-						|| fs.existsSync(config.projectsDirectory() + "/" + dirs[dir] + '/' + dir2 + "/Kt")
-						|| fs.existsSync(config.projectsDirectory() + "/" + dirs[dir] + '/' + dir2 + "/Kha")) {
-						projects[dirs[dir] + '/' + dir2] = {name: dirs[dir] + '/' + dir2, project: dirs[dir] + '/' + dir2, available: true};
+					var name = dirs[dir] + '/' + dir2;
+					if (projects[name] !== undefined) {
+						projects[name].available = true;
+					}
+					else if (isProject(name)) {
+						projects[name] = {name: name, project: name, available: true};
 					}
 				}
 			}
