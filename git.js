@@ -51,7 +51,7 @@ function spawnGit(parameters, dir, callback, retrynum) {
 	process.on('error', function (err) {
 		if (retrynum > 2) {
 			log.error('Git error with parameters' + params + ' in ' + dir);
-			callback(code, std);
+			callback(1, std);
 		}
 		else {
 			spawnGit(parameters, dir, callback, retrynum + 1);
