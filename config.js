@@ -26,11 +26,14 @@ var options = {
 	]
 };
 
-var filename;
+var serverData = { };
+
+var optionsPath;
+var optionsFile;
 
 function load() {
 	try {
-		options = JSON.parse(fs.readFileSync(filename, {encoding: 'utf8'}));
+		options = JSON.parse(fs.readFileSync(optionsFile, {encoding: 'utf8'}));
 		if (options.hideUnavailable === undefined) options.hideUnavailable = false;
 		if (options.git === undefined) options.git = 'git';
 		for (var s in options.servers) {
@@ -43,17 +46,27 @@ function load() {
 		options.projectsDirectory = localStorage.getItem('projectsDirectory');
 		options.mp3encoder = localStorage.getItem('mp3encoder');
 		options.aacencoder = localStorage.getItem('aacencoder');
-	}	
+	}
+	for (var s in options.servers) {
+		var server = options.servers[s];
+		try {
+			serverData[server.name] = JSON.parse(fs.readFileSync(optionsPath + server.name + '.json', {encoding: 'utf8'}));
+		}
+		catch (e) {
+			serverData[server.name] = { etag: null, repositories: [] };
+		}
+	}
 }
 
 function save() {
-	fs.writeFile(filename, JSON.stringify(options, null, '\t'), {encoding: 'utf8'}, function (err) {
-
+	fs.writeFile(optionsFile, JSON.stringify(options, null, '\t'), {encoding: 'utf8'}, function (err) {
+		// TODO: log error?
 	});
 }
 
 exports.init = function (dataPath) {
-	filename = dataPath + path.sep + 'options.json';
+	optionsPath = dataPath + path.sep;
+	optionsFile = optionsPath + 'options.json';
 	load();
 }
 
@@ -71,6 +84,10 @@ exports.aacEncoder = function () {
 
 exports.servers = function () {
 	return options.servers;
+}
+
+exports.serverData = function (serverName) {
+	return serverData[serverName];
 }
 
 exports.hideUnavailable = function () {
@@ -104,4 +121,10 @@ exports.setHideUnavailable = function (hide) {
 exports.setGit = function (git) {
 	options.git = git;
 	save();
+}
+
+exports.saveServerData = function (serverName) {
+	fs.writeFile(optionsPath + serverName + '.json', JSON.stringify(serverData[serverName], null, '\t'), {encoding: 'utf8'}, function (err) {
+		// TODO: log error?
+	});
 }

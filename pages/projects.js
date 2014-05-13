@@ -171,7 +171,7 @@ function finishServer() {
 	}
 }
 
-function getServerInfo(res, server, serverPrio) {
+function getServerInfo(res, server, serverPrio, serverData, page) {
 	if (res.headers.link !== undefined) {
 		//<https://api.github.com/resource?page=2>; rel="next",
 		let links = res.headers.link.split(/,/);
@@ -187,8 +187,9 @@ function getServerInfo(res, server, serverPrio) {
 					headers: {'User-Agent': 'Kit'}
 				};
 				++serverCount;
-				https.get(options, function (res) { getServerInfo(res, server, serverPrio); }).on("error", function(e) {
-					log.error("Could not load additional projects data.");
+				https.get(options, function (res) { getServerInfo(res, server, serverPrio, serverData, page+1); }).on("error", function(e) {
+					log.error(server.name + ": Could not load additional projects data.");
+					finishServer();
 				});;
 				break;
 			}
@@ -202,9 +203,34 @@ function getServerInfo(res, server, serverPrio) {
 	});
 	res.on("end", function() {
 		if (server.type === 'github') {
-			var repositories = JSON.parse(data);
+			var repositories;
+			if (res.statusCode == 304) {
+				repositories = serverData.repositories;
+			} else if (res.statusCode != 200) {
+				try {
+					var result = JSON.parse(data);
+					log.error(server.name + ": " + result.message + " (" + result.documentation_url + ")");
+				} catch (e) {
+					log.error(server.name + ": Unknown error.");
+				}
+				finishServer();
+				return;
+			} else {
+				result = JSON.parse(data);
+				if (page == 0) {
+					repositories = [];
+					serverData.etag = res.headers.etag;
+					serverData.repositories = repositories;
+				} else {
+					repositories = serverData.repositories;
+				}
+				for (var r in result) {
+					repositories.push(result[r].name.trim());
+				}
+				config.saveServerData(server.name);
+			}
 			for (var r in repositories) {
-				let name = repositories[r].name.trim();
+				let name = repositories[r].trim();
 				let project = {name: name, server: server, prio: serverPrio, baseurl: 'https://github.com/' + server.path.split(/\//)[1] + '/', others: []};
 				if (projects[name] === undefined) {
 					projects[name] = project;
@@ -256,6 +282,7 @@ function loadRepositories() {
 	let serverNum = 0;
 	for (var s in config.servers()) {
 		let server = config.servers()[s];
+		let serverData = config.serverData(server.name);
 		let serverPrio = serverNum;
 		++serverNum;
 
@@ -266,6 +293,9 @@ function loadRepositories() {
 				path: '/' + server.path + '/repos',
 				headers: {'User-Agent': 'Kit'}
 			};
+			if (serverData.etag) {
+				options.headers['If-None-Match'] = serverData.etag;
+			}
 		}
 		else if (server.type === 'gitblit') {
 			options = {
@@ -279,11 +309,9 @@ function loadRepositories() {
 			};
 		}
 
-		https.get(options, function (res) { getServerInfo(res, server, serverPrio); }).on("error", function(e) {
-			log.info("Could not download list of projects.");
-			projects = {};
-			findProjectDirs();
-			addProjects();
+		https.get(options, function (res) { getServerInfo(res, server, serverPrio, serverData, 0); }).on("error", function(e) {
+			log.info(server.name + ": Could not download list of projects for Server.");
+			finishServer();
 		});
 	}
 }
