@@ -171,6 +171,32 @@ function finishServer() {
 	}
 }
 
+function pushServer(array, project) {
+	for (var v in array) {
+		var value = array[v];
+		if (value.server.name === project.server.name) return;
+	}
+	array.push(project);
+}
+
+function addProject(project, serverPrio, projects) {
+	var name = project.name;
+	if (projects[name] === undefined) {
+		projects[name] = project;
+	}
+	else if (projects[name].prio < serverPrio) {
+		for (var o in projects[name].others) {
+			pushServer(project.others, projects[name].others[o]);
+		}
+		projects[name].others = [];
+		pushServer(project.others, projects[name]);
+		projects[name] = project;
+	}
+	else {
+		pushServer(projects[name].others, project);
+	}
+}
+
 function getServerInfo(res, server, serverPrio, serverData, page) {
 	if (res.headers.link !== undefined) {
 		//<https://api.github.com/resource?page=2>; rel="next",
@@ -232,20 +258,7 @@ function getServerInfo(res, server, serverPrio, serverData, page) {
 			for (var r in repositories) {
 				let name = repositories[r].trim();
 				let project = {name: name, server: server, prio: serverPrio, baseurl: 'https://github.com/' + server.path.split(/\//)[1] + '/', others: []};
-				if (projects[name] === undefined) {
-					projects[name] = project;
-				}
-				else if (projects[name].prio < serverPrio) {
-					for (var o in projects[name].others) {
-						project.others.push(projects[name].others[o]);
-					}
-					projects[name].others = [];
-					project.others.push(projects[name]);
-					projects[name] = project;
-				}
-				else {
-					projects[name].others.push(project);
-				}
+				addProject(project, serverPrio, projects);
 			}
 			finishServer();
 		}
@@ -255,20 +268,7 @@ function getServerInfo(res, server, serverPrio, serverData, page) {
 				var repo = repositories[r];
 				let name = repo.name.substr(0, repo.name.length - 4).trim();
 				let project = {name: name, server: server, prio: serverPrio, baseurl: 'https://' + server.url + '/r/', others: []};
-				if (projects[name] === undefined) {
-					projects[name] = project;
-				}
-				else if (projects[name].prio < serverPrio) {
-					for (var o in projects[name].others) {
-						project.others.push(projects[name].others[o]);
-					}
-					projects[name].others = [];
-					project.others.push(projects[name]);
-					projects[name] = project;
-				}
-				else {
-					projects[name].others.push(project);
-				}
+				addProject(project, serverPrio, projects);
 			}
 			finishServer();
 		}

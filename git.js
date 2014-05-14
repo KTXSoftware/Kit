@@ -49,19 +49,14 @@ function spawnGit(parameters, dir, callback, retrynum) {
 	});
 
 	process.on('error', function (err) {
-		if (retrynum > 2) {
-			log.error('Git error with parameters' + params + ' in ' + dir);
-			callback(1, std);
-		}
-		else {
-			spawnGit(parameters, dir, callback, retrynum + 1);
-		}
+		log.error('Could not call git with parameters' + params + ' in ' + dir);
+		callback(1, std);
 	});
 
 	process.on('close', function (code) {
 		if (code !== 0) {
 			if (retrynum > 2) {
-				log.error('Git error with parameters' + params + ' in ' + dir);
+				log.error('Git reported error with parameters' + params + ' in ' + dir);
 				callback(code, std);
 			}
 			else {
