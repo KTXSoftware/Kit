@@ -2,6 +2,7 @@
 
 var config = require('./config.js');
 var fs = require('fs');
+var os = require('os');
 var path = require('path');
 var spawn = require('child_process').spawn;
 var log = require('./log.js');
@@ -33,7 +34,8 @@ function spawnGit(parameters, dir, callback, retrynum) {
 	log.info('Calling git' + params + ' in ' + dir);
 	
 	var env = myProcess.env;
-	env.GIT_ASKPASS = myProcess.cwd() + '/Kit/kitpass/kitpass.exe';
+	if (os.platform() === 'darwin') env.GIT_ASKPASS = myProcess.cwd() + '/Kit/kitpass/kitpass-osx';
+	else env.GIT_ASKPASS = myProcess.cwd() + '/Kit/kitpass/kitpass.exe';
 	env.KIT_DATA_PATH = dataPath;
 	var process = spawn(config.git(), parameters, {cwd: dir, env: env});
 	process.stdin.setEncoding('utf8');
