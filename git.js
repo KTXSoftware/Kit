@@ -35,6 +35,7 @@ function spawnGit(parameters, dir, callback, retrynum) {
 	
 	var env = myProcess.env;
 	if (os.platform() === 'darwin') env.GIT_ASKPASS = myProcess.cwd() + '/Kit/kitpass/kitpass-osx';
+	else if (os.platform() === 'linux') env.GIT_ASKPASS = myProcess.cwd() + '/Kit/kitpass/kitpass-linux';
 	else env.GIT_ASKPASS = myProcess.cwd() + '/Kit/kitpass/kitpass.exe';
 	env.KIT_DATA_PATH = dataPath;
 	var process = spawn(config.git(), parameters, {cwd: dir, env: env});
