@@ -2,6 +2,7 @@ var cp = require("child_process");
 var fs = require('fs');
 var os = require("os");
 var config = require("../config.js");
+var log = require('../log.js');
 
 var document = window.document;
 
@@ -101,6 +102,20 @@ exports.load = function(repository, kha, element) {
 		var child = cp.spawn(config.projectsDirectory() + "/" + repository + "/Kha/Tools/hake/" + exe,
 			[getSystem(select), "mp3=" + config.mp3Encoder(), "aac=" + config.aacEncoder()],
 			{ cwd: config.projectsDirectory() + "/" + repository});
+
+		child.stdout.on('data', function (data) {
+			log.info(data);
+		});
+
+		child.stderr.on('data', function (data) {
+			log.error(data);
+		});
+
+		child.on('error', function (err) {
+			log.error('Haxe error');
+			//callback();
+		});
+
 		child.on('close', callback);
 	}
 
