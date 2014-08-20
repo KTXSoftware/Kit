@@ -1,93 +1,30 @@
-var cp = require("child_process");
-var fs = require('fs');
-var os = require("os");
-var config = require("../config.js");
+define(['../react.js', '../config.js'], function (React, config) {
+	var cp = require("child_process");
+	var fs = require('fs');
+	var os = require("os");
 
-var document = window.document;
-
-function addOption(select, value) {
-	var option = document.createElement("option");
-	option.appendChild(document.createTextNode(value));
-	select.appendChild(option);
-}
-
-function getSystem(select) {
-	switch (select.selectedIndex) {
-	case 0:
-		return "flash";
-	case 1:
-		return "html5";
-	case 2:
-		return "windows";
-	case 3:
-		return "osx";
-	case 4:
-		return "linux";
-	case 5:
-		return "ios";
-	case 6:
-		return "android";
-	case 7:
-		return "windowsrt";
-	case 8:
-		return "tizen";
-	case 9:
-		return "psm";
-	case 10:
-		return "xna";
-	case 11:
-		return "dalvik";
-	case 12:
-		return "wpf";
-	case 13:
-		return "java";
+	function open(file) {
+		if (os.platform() === 'linux') { }
+		else if (os.platform() === 'win32') {
+			cp.spawn('cmd', ['/c', 'start', '""', file]);
+		}
+		else {
+			cp.spawn('open', [file]);
+		}
 	}
-}
 
-function open(file) {
-	if (os.platform() === 'linux') { }
-	else if (os.platform() === 'win32') {
-		cp.spawn('cmd', ['/c', 'start', '""', file]);
+	var currentServer = null;
+
+	function startServer(dir) {
+		var nstatic = require('node-static');
+		var file = new nstatic.Server(dir);
+		currentServer = require('http').createServer(function (request, response) {
+			request.addListener('end', function () {
+				file.serve(request, response);
+			}).resume();
+		});
+		currentServer.listen(8080);
 	}
-	else {
-		cp.spawn('open', [file]);
-	}
-}
-
-var currentServer = null;
-
-function startServer(dir) {
-	var nstatic = require('node-static');
-	var file = new nstatic.Server(dir);
-	currentServer = require('http').createServer(function (request, response) {
-		request.addListener('end', function () {
-			file.serve(request, response);
-		}).resume();
-	});
-	currentServer.listen(8080);
-}
-
-exports.load = function(repository, kha, element) {
-	var select = document.createElement("select");
-	addOption(select, "Flash");
-	addOption(select, "HTML5");
-	addOption(select, "Windows");
-	addOption(select, "OSX");
-	addOption(select, "Linux");
-	addOption(select, "iOS");
-	addOption(select, "Android");
-	addOption(select, "WindowsRT");
-	addOption(select, "Tizen");
-	addOption(select, "PlayStationMobile");
-	addOption(select, "XNA");
-	addOption(select, "Dalvik");
-	addOption(select, "WPF");
-	addOption(select, "Java");
-	element.appendChild(select);
-
-	var button = document.createElement("button");
-	button.appendChild(document.createTextNode("Create"));
-	element.appendChild(button);
 
 	var exe = "hake-osx";
 	if (os.platform() === "linux") {
@@ -97,59 +34,88 @@ exports.load = function(repository, kha, element) {
 		exe = "hake.exe";
 	}
 
-	function create(callback) {
+	function create(system, repository, callback) {
 		var child = cp.spawn(config.projectsDirectory() + "/" + repository + "/Kha/Tools/hake/" + exe,
-			[getSystem(select), "mp3=" + config.mp3Encoder(), "aac=" + config.aacEncoder()],
+			[system, "mp3=" + config.mp3Encoder(), "aac=" + config.aacEncoder()],
 			{ cwd: config.projectsDirectory() + "/" + repository});
 		child.on('close', callback);
 	}
 
-	button.onclick = function () {
-		create(function () { });
-	};
+	return React.createClass({displayName: 'ProjectPage',
+		getInitialState: function () {
+			this.system = 'flash';
+			return null;
+		},
+		create: function () {
+			create(this.system, this.props.repository, function () { });
+		},
+		launch: function () {
+			var self = this;
+			create(this.system, this.props.repository, function () {
+				open(config.projectsDirectory() + '/' + self.props.repository + '/build/project-' + self.system + '.hxproj');
 
-	var launchButton = document.createElement('button');
-	launchButton.appendChild(document.createTextNode('Launch IDE'));
-	element.appendChild(launchButton);
-
-	launchButton.onclick = function () {
-		create(function () {
-			open(config.projectsDirectory() + '/' + repository + '/build/project-' + getSystem(select) + '.hxproj');
-
-			var projectName = config.projectsDirectory();
-			if (fs.existsSync(config.projectsDirectory() + '/' + repository + '/project.kha')) {
-				var kha = JSON.parse(fs.readFileSync(config.projectsDirectory() + '/' + repository + '/project.kha', {encoding: 'utf8'}));
-				projectName = kha.game.name;
-			}
-
-			switch (getSystem(select)) {
-			case 'html5':
-				if (currentServer !== null) {
-					currentServer.close(function () {
-						startServer(config.projectsDirectory() + '/' + repository + '/build/html5/');
-					});
+				var projectName = config.projectsDirectory();
+				if (fs.existsSync(config.projectsDirectory() + '/' + self.props.repository + '/project.kha')) {
+					var kha = JSON.parse(fs.readFileSync(config.projectsDirectory() + '/' + self.props.repository + '/project.kha', {encoding: 'utf8'}));
+					projectName = kha.game.name;
 				}
-				else {
-					startServer(config.projectsDirectory() + '/' + repository + '/build/html5/');
+
+				switch (self.system) {
+				case 'html5':
+					if (currentServer !== null) {
+						currentServer.close(function () {
+							startServer(config.projectsDirectory() + '/' + self.props.repository + '/build/html5/');
+						});
+					}
+					else {
+						startServer(config.projectsDirectory() + '/' + self.props.repository + '/build/html5/');
+					}
+					break;
+				case 'windows':
+				case 'windowsrt':
+					var projectFile = config.projectsDirectory() + '/' + self.props.repository + '/build/' + projectName + '.sln';
+					if (!fs.existsSync(projectFile)) projectFile = config.projectsDirectory() + '/' + self.props.repository + '/build/' + self.system + '-build/' + projectName + '.sln';
+					open(projectFile);
+					break;
+				case 'osx':
+				case 'ios':
+					var projectFile = config.projectsDirectory() + '/' + self.props.repository + '/build/' + projectName + '.xcodeproj';
+					if (!fs.existsSync(projectFile)) projectFile = config.projectsDirectory() + '/' + self.props.repository + '/build/' + self.system + '-build/' + projectName + '.xcodeproj';
+					open(projectFile);
+					break;
+				case 'wpf':
+				case 'xna':
+					open(config.projectsDirectory() + '/' + self.props.repository + '/build/' + self.system + '-build/Project.sln');
+					break;
 				}
-				break;
-			case 'windows':
-			case 'windowsrt':
-				var projectFile = config.projectsDirectory() + '/' + repository + '/build/' + projectName + '.sln';
-				if (!fs.existsSync(projectFile)) projectFile = config.projectsDirectory() + '/' + repository + '/build/' + getSystem(select) + '-build/' + projectName + '.sln';
-				open(projectFile);
-				break;
-			case 'osx':
-			case 'ios':
-				var projectFile = config.projectsDirectory() + '/' + repository + '/build/' + projectName + '.xcodeproj';
-				if (!fs.existsSync(projectFile)) projectFile = config.projectsDirectory() + '/' + repository + '/build/' + getSystem(select) + '-build/' + projectName + '.xcodeproj';
-				open(projectFile);
-				break;
-			case 'wpf':
-			case 'xna':
-				open(config.projectsDirectory() + '/' + repository + '/build/' + getSystem(select) + '-build/Project.sln');
-				break;
-			}
-		});
-	};
-}
+			});
+		},
+		selection: function (event) {
+			this.system = event.target.value;
+		},
+		render: function () {
+			return (
+				React.DOM.div(null,
+					React.DOM.select({value: 'flash', onChange: this.selection},
+						React.DOM.option({value: 'flash'}, 'Flash'),
+						React.DOM.option({value: 'html5'}, 'HTML5'),
+						React.DOM.option({value: 'windows'}, 'Windows'),
+						React.DOM.option({value: 'osx'}, 'OSX'),
+						React.DOM.option({value: 'linux'}, 'Linux'),
+						React.DOM.option({value: 'ios'}, 'iOS'),
+						React.DOM.option({value: 'android'}, 'Android'),
+						React.DOM.option({value: 'windowsrt'}, 'WindowsRT'),
+						React.DOM.option({value: 'tizen'}, 'Tizen'),
+						React.DOM.option({value: 'psm'}, 'PlayStationMobile'),
+						React.DOM.option({value: 'xna'}, 'XNA'),
+						React.DOM.option({value: 'dalvik'}, 'Dalvik'),
+						React.DOM.option({value: 'wpf'}, 'WPF'),
+						React.DOM.option({value: 'java'}, 'Java')
+					),
+					React.DOM.button({onClick: this.create}, 'Create'),
+					React.DOM.button({onClick: this.launch}, 'Launch IDE')
+				)
+			);
+		}
+	});
+});

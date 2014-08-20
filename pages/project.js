@@ -1,66 +1,58 @@
-var fs   = require("fs");
-var config = require("../config.js");
-var page = require("../page.js");
-var projectPage = require("../projectPages/project.js");
-var assetsPage  = require("../projectPages/assets.js");
-var roomsPage   = require("../projectPages/rooms.js");
+define(['../config.js', '../react.js', '../projectPages/project.js'], function (config, React, ProjectPage) {
+	var fs = require('fs');
+	//var projectPage = require("../projectPages/project.js");
+	//var assetsPage  = require("../projectPages/assets.js");
+	//var roomsPage   = require("../projectPages/rooms.js");
 
-var document = window.document;
-
-function clear(element) {
-	while (element.lastChild) {
-		element.removeChild(element.lastChild);
-	}
-}
-
-exports.load = function(repository) {
-	if (fs.existsSync(config.projectsDirectory() + "/" + repository + "/project.kha")) {
-		var kha = JSON.parse(fs.readFileSync(config.projectsDirectory() + "/" + repository + "/project.kha", {encoding: "utf8"}));
-		kha.save = function() {
-			var string = JSON.stringify(kha, null, "\t");
-			fs.writeFileSync(config.projectsDirectory() + "/" + repository + "/project.kha", string, {encoding: "utf8"});
-		};
-	}
-
-	page.clear();
-	var content = document.getElementById("content");
-
-	var table = document.createElement("table");
-	var tr = document.createElement("tr");
-	var td = document.createElement("td");
-
-	var projectButton = document.createElement("button");
-	projectButton.appendChild(document.createTextNode(repository));
-	td.appendChild(projectButton);
-	var assetsButton = document.createElement("button");
-	assetsButton.appendChild(document.createTextNode("Assets"));
-	td.appendChild(assetsButton);
-	roomsButton = document.createElement("button");
-	roomsButton.appendChild(document.createTextNode("Rooms"));
-	td.appendChild(roomsButton);
-	tr.appendChild(td);
-	table.appendChild(tr);
-
-	tr = document.createElement("tr");
-	td = document.createElement("td");
-	
-	projectButton.onclick = function() {
-		clear(td);
-		projectPage.load(repository, kha, td);
-	};
-	assetsButton.onclick = function() {
-		clear(td);
-		assetsPage.load(repository, kha, td);
-	};
-	roomsButton.onclick = function() {
-		clear(td);
-		roomsPage.load(repository, kha, td);
-	};
-
-	projectPage.load(repository, kha, td);
-
-	tr.appendChild(td);
-	table.appendChild(tr);
-
-	content.appendChild(table);
-}
+	return React.createClass({displayName: 'Project',
+		getInitialState: function () {
+			if (fs.existsSync(config.projectsDirectory() + "/" + this.props.name + "/project.kha")) {
+				var kha = JSON.parse(fs.readFileSync(config.projectsDirectory() + "/" + this.props.name + "/project.kha", {encoding: "utf8"}));
+				var self = this;
+				kha.save = function () {
+					var string = JSON.stringify(kha, null, "\t");
+					fs.writeFileSync(config.projectsDirectory() + "/" + self.props.name + "/project.kha", string, {encoding: "utf8"});
+				};
+			}
+			//projectButton.onclick = function() {
+			//	clear(td);
+			//	projectPage.load(repository, kha, td);
+			//};
+			//assetsButton.onclick = function() {
+			//	clear(td);
+			//	assetsPage.load(repository, kha, td);
+			//};
+			//roomsButton.onclick = function() {
+			//	clear(td);
+			//	roomsPage.load(repository, kha, td);
+			//};
+			//projectPage.load(repository, kha, td);
+			return {page: 'Project'};
+		},
+		loadProject: function () {
+			this.setState({page: 'Project'});
+		},
+		render: function () {
+			var page = null;
+			switch (this.state.page) {
+				case 'Project':
+					page = ProjectPage({repository: this.props.name});
+					break;
+			}
+			return (
+				React.DOM.table(null,
+					React.DOM.tr(null,
+						React.DOM.td(null,
+							React.DOM.button({onClick: this.loadProject}, this.props.name),
+							React.DOM.button(null, 'Assets'),
+							React.DOM.button(null, 'Rooms')
+						)
+					),
+					React.DOM.tr(null,
+						React.DOM.td(null, page)
+					)
+				)
+			);
+		}
+	});
+});
