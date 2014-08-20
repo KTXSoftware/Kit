@@ -26,7 +26,7 @@ define(['../react.js'], function (React) {
 		return array.push.apply(array, rest);
 	}
 
-	function remove(room, asset, table, line) {
+	function remove(room, asset) {
 		for (var assetId in room.assets) {
 			if (asset.id === room.assets[assetId]) {
 				arrayRemove(room.assets, room.assets.indexOf(room.assets[assetId]));
@@ -35,20 +35,19 @@ define(['../react.js'], function (React) {
 		}
 	}
 
-	function addLine(kha, room, asset, rows) {
+	function addLine(kha, room, asset, rows, component) {
 		let line = React.DOM.tr(null,
 			React.DOM.td(null, asset.name),
-			React.DOM.td(null, React.DOM.button(null, '-'))
+			React.DOM.td(null, React.DOM.button({onClick: function () {
+				remove(room, asset);
+				kha.save();
+				component.forceUpdate();
+			}}, '-'))
 		);
 		rows.push(line);
-		//button.onclick = function() {
-		//	remove(room, asset, table, line);
-		//	kha.save();
-		//	loadRoom(kha, room);
-		//};
 	}
 
-	function loadAssets(kha, room, type, title, rows) {
+	function loadAssets(kha, room, type, title, rows, component) {
 		var row = React.DOM.tr(null,
 			React.DOM.td(null,
 				React.DOM.h3(null, title)
@@ -65,7 +64,13 @@ define(['../react.js'], function (React) {
 		}
 		row = React.DOM.tr(null,
 			React.DOM.td(null,
-				React.DOM.select(null, options)
+				React.DOM.select({onChange: function (event) {
+					if (event.target.selectedIndex < 0) return;
+					var value = event.target.options[event.target.selectedIndex].value;
+					room.assets.push(value);
+					kha.save();
+					//loadRoom(kha, room);
+				}}, options)
 			)
 		);
 		rows.push(row);
@@ -74,18 +79,10 @@ define(['../react.js'], function (React) {
 		//	select.selectedIndex = -1;
 		//};
 
-		//select.onchange = function () {
-		//	if (select.selectedIndex < 0) return;
-		//	var value = select.options[select.selectedIndex].value;
-		//	room.assets.push(value);
-		//	kha.save();
-		//	loadRoom(kha, room);
-		//};
-		
 		for (var id in room.assets) {
 			let asset = findAsset(kha, room.assets[id]);
 			if (asset.type === type) {
-				addLine(kha, room, asset, rows);
+				addLine(kha, room, asset, rows, component);
 			}
 		}
 	}
@@ -106,36 +103,35 @@ define(['../react.js'], function (React) {
 
 			var roomRows = [];
 			if (this.state.room !== null) {
-				loadAssets(this.props.kha, this.props.kha.rooms[this.state.room], "image", "Images", roomRows);
-				loadAssets(this.props.kha, this.props.kha.rooms[this.state.room], "sound", "Sounds", roomRows);
-				loadAssets(this.props.kha, this.props.kha.rooms[this.state.room], "music", "Music", roomRows);
-				loadAssets(this.props.kha, this.props.kha.rooms[this.state.room], "blob", "Blobs", roomRows);
+				loadAssets(this.props.kha, this.props.kha.rooms[this.state.room], "image", "Images", roomRows, this);
+				loadAssets(this.props.kha, this.props.kha.rooms[this.state.room], "sound", "Sounds", roomRows, this);
+				loadAssets(this.props.kha, this.props.kha.rooms[this.state.room], "music", "Music", roomRows, this);
+				loadAssets(this.props.kha, this.props.kha.rooms[this.state.room], "blob", "Blobs", roomRows, this);
 			}
 
-			/*
-			button.onclick = function() {
-				let room = {
-					id : uuid.v4(),
-					name: input.value,
-					parent: null,
-					neighbours: [],
-					assets: []
-				};
-				kha.rooms.push(room);
-				kha.save();
-			};
-			*/
 			return (
 				React.DOM.table(null,
 					React.DOM.tbody(null,
 						React.DOM.tr(null,
-							React.DOM.td({valign: 'top'},
-								React.DOM.input(null),
+							React.DOM.td({style: {'vertical-align': 'top'}},
+								React.DOM.input({onChange: function (event) { self.newroomname = event.target.value; }}),
 								React.DOM.br(null),
-								React.DOM.button(null, 'Add room'),
+								React.DOM.button({onClick: function () {
+									if (!self.newroomname) return;
+									let room = {
+										id : uuid.v4(),
+										name: self.newroomname,
+										parent: null,
+										neighbours: [],
+										assets: []
+									};
+									self.props.kha.rooms.push(room);
+									self.props.kha.save();
+									self.forceUpdate();
+								}}, 'Add room'),
 								rooms
 							),
-							React.DOM.td({valign: 'top'},
+							React.DOM.td({style: {'vertical-align': 'top'}},
 								React.DOM.table(null,
 									React.DOM.tbody(null, roomRows)
 								)

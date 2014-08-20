@@ -163,9 +163,10 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 		res.on("end", function() {
 			if (server.type === 'github') {
 				var repositories;
-				if (res.statusCode == 304) {
+				if (res.statusCode === 304) {
 					repositories = serverData.repositories;
-				} else if (res.statusCode != 200) {
+				}
+				else if (res.statusCode !== 200) {
 					try {
 						var result = JSON.parse(data);
 						log.error(server.name + ": " + result.message + " (" + result.documentation_url + ")");
@@ -174,13 +175,15 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 					}
 					finishServer(callback);
 					return;
-				} else {
+				}
+				else {
 					result = JSON.parse(data);
-					if (page == 0) {
+					if (page === 0) {
 						repositories = [];
 						serverData.etag = res.headers.etag;
 						serverData.repositories = repositories;
-					} else {
+					}
+					else {
 						repositories = serverData.repositories;
 					}
 					for (var r in result) {
@@ -348,27 +351,23 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 
 				var tr = React.DOM.tr(null,
 					React.DOM.td(null, project.name),
-					React.DOM.td(null, React.DOM.button(null, project.available ? 'Update' : 'Download')),
-					React.DOM.td(null, React.DOM.button({onClick: function () { self.setState({repos: [], projectName: project.name}) }}, 'Open'))
+					React.DOM.td(null, React.DOM.button({onClick: function () {
+						//document.getElementById("kitt").style.visibility = "visible";
+						//kittanimated = true;
+						//animate();
+						git.update(project, this.state.repos, config.projectsDirectory() + "/",
+							function() {
+								//document.getElementById("kitt").style.visibility = "hidden";
+								//kittanimated = false;
+								//button.element.removeChild(button.element.lastChild);
+								//button.element.appendChild(document.createTextNode("Update"));
+								//openButton.element.disabled = false;
+								self.forceUpdate();
+							}
+						);
+					}}, project.available ? 'Update' : 'Download')),
+					React.DOM.td(null, React.DOM.button({disabled: !project.available, onClick: function () { self.setState({repos: [], projectName: project.name}) }}, 'Open'))
 				);
-
-				//button.element.onclick = function() {
-				//	document.getElementById("kitt").style.visibility = "visible";
-				//	kittanimated = true;
-				//	animate();
-				//	git.update(project, projects, config.projectsDirectory() + "/",
-				//		function() {
-				//			document.getElementById("kitt").style.visibility = "hidden";
-				//			kittanimated = false;
-				//			button.element.removeChild(button.element.lastChild);
-				//			button.element.appendChild(document.createTextNode("Update"));
-				//			openButton.element.disabled = false;
-				//		}
-				//	);
-				//};
-
-				//if (!project.available) openButton.element.disabled = true;
-
 				lines.push(tr);
 			}
 			return (

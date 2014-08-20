@@ -21,7 +21,7 @@ define(['./config.js', './log.js'], function (config, log) {
 			}
 		}
 		data = data.slice(lastGoodReturn);
-		kitt.innerHTML = data;
+		//kitt.innerHTML = data;
 	}
 
 	function spawnGit(parameters, dir, callback, retrynum) {
@@ -222,13 +222,13 @@ define(['./config.js', './log.js'], function (config, log) {
 		fs.stat(projectsDir + repo.name, function(err, stats) {
 			if (!err && stats.isDirectory()) {
 				pull(projectsDir, projectsDir + repo.name, !isSpecial(repo.name) && repo.name.indexOf('/') === -1, function () {
-					kitt.innerHTML = '';
+					//kitt.innerHTML = '';
 					callback();
 				});
 			}
 			else {
 				clone(repo, repos, "master", null, projectsDir, repo.name, projectsDir, !isSpecial(repo.name) && repo.name.indexOf('/') === -1, function() {
-					kitt.innerHTML = '';
+					//kitt.innerHTML = '';
 					callback();
 				});
 			}

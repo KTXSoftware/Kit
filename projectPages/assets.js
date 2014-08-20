@@ -23,6 +23,7 @@ define(['../config.js', '../react.js'], function (config, React) {
 			this.setState({type: event.target.value});
 		},
 		render: function () {
+			var self = this;
 			var rows = [];
 			for (var asset in this.props.kha.assets) {
 				let current = this.props.kha.assets[asset];
@@ -32,20 +33,19 @@ define(['../config.js', '../react.js'], function (config, React) {
 							React.DOM.a({href: '#', onClick: function () { return false; }}, current.name)
 						),
 						React.DOM.td(null,
-							React.DOM.button(null, '-')
+							React.DOM.button({onClick: function () {
+								for (var a in self.props.kha.assets) {
+									let asset = self.props.kha.assets[a];
+									if (asset.type === current.type && asset.name === current.name) {
+										remove(self.props.kha.assets, self.props.kha.assets.indexOf(asset));
+										self.props.kha.save();
+										self.forceUpdate();
+										return;
+									}
+								}		
+							}}, '-')
 						)
 					);
-
-					/*button.onclick = function() {
-						for (var asset in assets) {
-							if (assets[asset].type === type && assets[asset].name === current.name) {
-								remove(assets, assets.indexOf(assets[asset]));
-								kha.save();
-								loadAssets(assets, type, element);
-								return;
-							}
-						}
-					};*/
 					rows.push(tr);
 				}
 			}
@@ -58,7 +58,31 @@ define(['../config.js', '../react.js'], function (config, React) {
 						React.DOM.option({value: 'blob'}, 'Blobs')
 					),
 					React.DOM.br(null),
-					React.DOM.input({type: 'file'}),
+					React.DOM.input({type: 'file', onChange: function (event) {
+						var dir = "/Assets/"
+						switch (this.selection) {
+						case 'image':
+							dir += "Graphics/";
+							break;
+						case 'sound':
+						case 'music':
+							dir += "Sound/";
+							break;
+						}
+						var value = event.target.value.replace(/\\/g, "/");
+						var name = value.substr(value.lastIndexOf("/") + 1);
+						copyFile(value, config.projectsDirectory() + "/" + this.props.repository + dir + name);
+						var shortname = name.substring(0, name.lastIndexOf("."));
+						var type = this.selection;
+						this.props.kha.assets.push({
+							id: uuid.v4(),
+				      		type: type,
+				      		file: name,
+				      		name: shortname
+						});
+						this.props.kha.save();
+						this.forceUpdate();
+					}}),
 					React.DOM.div(null,
 						React.DOM.table(null, React.DOM.tbody(null, rows))
 					)
@@ -66,43 +90,4 @@ define(['../config.js', '../react.js'], function (config, React) {
 			);
 		}
 	});
-
-	/*
-		button.onchange = function() {
-			var dir = "/Assets/"
-			switch (select.selectedIndex) {
-			case 0:
-				dir += "Graphics/";
-				break;
-			case 1:
-			case 2:
-				dir += "Sound/";
-				break;
-			}
-			var value = button.value.replace(/\\/g, "/");
-			var name = value.substr(value.lastIndexOf("/") + 1);
-			copyFile(value, config.projectsDirectory() + "/" + repository + dir + name);
-			var shortname = name.substring(0, name.lastIndexOf("."));
-			var type = "image";
-			switch (select.selectedIndex) {
-			case 1:
-				type = "music";
-				break;
-			case 2:
-				type = "sound";
-				break;
-			case 3:
-				type = "blob";
-				break;
-			}
-			kha.assets.push( {
-				id: uuid.v4(),
-	      		type: type,
-	      		file: name,
-	      		name: shortname
-			});
-			kha.save();
-			loadAssets(kha, kha.assets, type, div);
-		};
-	}*/
 });

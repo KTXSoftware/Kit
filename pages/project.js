@@ -6,7 +6,7 @@ define(['../config.js', '../react.js', '../projectPages/project.js', '../project
 				this.kha = JSON.parse(fs.readFileSync(config.projectsDirectory() + "/" + this.props.name + "/project.kha", {encoding: "utf8"}));
 				var self = this;
 				this.kha.save = function () {
-					var string = JSON.stringify(kha, null, "\t");
+					var string = JSON.stringify(self.kha, null, "\t");
 					fs.writeFileSync(config.projectsDirectory() + "/" + self.props.name + "/project.kha", string, {encoding: "utf8"});
 				};
 			}
@@ -28,7 +28,7 @@ define(['../config.js', '../react.js', '../projectPages/project.js', '../project
 					page = ProjectPage({repository: this.props.name});
 					break;
 				case 'Assets':
-					page = AssetsPage({kha: this.kha});
+					page = AssetsPage({repository: this.props.name, kha: this.kha});
 					break;
 				case 'Rooms':
 					page = RoomsPage({kha: this.kha});
