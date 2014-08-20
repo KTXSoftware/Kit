@@ -1,7 +1,5 @@
-define(['../config.js', '../react.js', '../projectPages/project.js', '../projectPages/assets.js'], function (config, React, ProjectPage, AssetsPage) {
+define(['../config.js', '../react.js', '../projectPages/project.js', '../projectPages/assets.js', '../projectPages/rooms.js'], function (config, React, ProjectPage, AssetsPage, RoomsPage) {
 	var fs = require('fs');
-	//var roomsPage   = require("../projectPages/rooms.js");
-
 	return React.createClass({displayName: 'Project',
 		getInitialState: function () {
 			if (fs.existsSync(config.projectsDirectory() + "/" + this.props.name + "/project.kha")) {
@@ -12,10 +10,6 @@ define(['../config.js', '../react.js', '../projectPages/project.js', '../project
 					fs.writeFileSync(config.projectsDirectory() + "/" + self.props.name + "/project.kha", string, {encoding: "utf8"});
 				};
 			}
-			//roomsButton.onclick = function() {
-			//	clear(td);
-			//	roomsPage.load(repository, kha, td);
-			//};
 			return {page: 'Project'};
 		},
 		loadProject: function () {
@@ -23,6 +17,9 @@ define(['../config.js', '../react.js', '../projectPages/project.js', '../project
 		},
 		loadAssets: function () {
 			this.setState({page: 'Assets'});
+		},
+		loadRooms: function () {
+			this.setState({page: 'Rooms'});
 		},
 		render: function () {
 			var page = null;
@@ -33,6 +30,9 @@ define(['../config.js', '../react.js', '../projectPages/project.js', '../project
 				case 'Assets':
 					page = AssetsPage({kha: this.kha});
 					break;
+				case 'Rooms':
+					page = RoomsPage({kha: this.kha});
+					break;
 			}
 			return (
 				React.DOM.table(null,
@@ -41,7 +41,7 @@ define(['../config.js', '../react.js', '../projectPages/project.js', '../project
 							React.DOM.td(null,
 								React.DOM.button({onClick: this.loadProject}, this.props.name),
 								React.DOM.button({onClick: this.loadAssets}, 'Assets'),
-								React.DOM.button(null, 'Rooms')
+								React.DOM.button({onClick: this.loadRooms}, 'Rooms')
 							)
 						),
 						React.DOM.tr(null,
