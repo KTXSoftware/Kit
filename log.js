@@ -1,18 +1,14 @@
 define(function () {
 	return {
-		button: null,
-		lines: [],
-		init: function (logButton) {
-			this.button = logButton;
-		},
+		text: '',
 		info: function (text) {
-			this.lines.push({ level: 0, text: text });
-			//logPage.update();
+			this.text += text + '\n';
+			//this.lines.push({ level: 0, text: text });
 		},
 		error: function (text) {
-			this.button.className = 'alert';
-			this.lines.push({ level: 1, text: text });
-			//logPage.update();
+			document.getElementById('logButton').className = 'alert';
+			this.text += text + '\n';
+			//this.lines.push({ level: 1, text: text });
 		}
 	};
 });

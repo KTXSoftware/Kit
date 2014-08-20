@@ -354,7 +354,7 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 						document.getElementById('kitt').style.visibility = 'visible';
 						kittanimated = true;
 						animate();
-						git.update(project, self.state.repos, config.projectsDirectory() + "/",
+						git.update(project, projects, config.projectsDirectory() + "/",
 							function() {
 								document.getElementById('kitt').style.visibility = 'hidden';
 								kittanimated = false;
