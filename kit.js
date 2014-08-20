@@ -57,8 +57,8 @@ requirejs(['domReady', './react.js', './log.js', './pages/log.js', './pages/conf
 										React.DOM.button({onClick: this.loadProjects}, 'Projects')
 									),
 									React.DOM.div({className: 'topright'},
-										React.DOM.input({checked: config.hideUnavailable(), type: 'checkbox', onChange: function (event) { config.setHideUnavailable(event.target.checked); self.forceUpdate(); }}),
-										React.DOM.span(null, ' Hide unavailable projects '),
+										React.DOM.input({checked: config.hideUnavailable(), type: 'checkbox', onChange: function () { config.setHideUnavailable(!config.hideUnavailable()); self.forceUpdate(); }}),
+										React.DOM.span({onClick: function () { config.setHideUnavailable(!config.hideUnavailable()); self.forceUpdate(); }}, ' Hide unavailable projects '),
 										React.DOM.button({onClick: this.loadConfig}, 'Config'),
 										React.DOM.button({onClick: this.loadLog}, 'Log'),
 										React.DOM.button({onClick: this.reload}, '\u21bb'),
