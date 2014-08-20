@@ -56,6 +56,7 @@ define(['../react.js'], function (React) {
 		rows.push(row);
 
 		var options = [];
+		options.push(React.DOM.option({value: '-'}, '-'));
 		for (var asset in kha.assets) {
 			if (kha.assets[asset].type === type && !contains(room, kha.assets[asset])) {
 				var option = React.DOM.option({value: kha.assets[asset].id}, kha.assets[asset].name)
@@ -64,20 +65,16 @@ define(['../react.js'], function (React) {
 		}
 		row = React.DOM.tr(null,
 			React.DOM.td(null,
-				React.DOM.select({onChange: function (event) {
-					if (event.target.selectedIndex < 0) return;
+				React.DOM.select({value: '-', onChange: function (event) {
+					if (event.target.selectedIndex <= 0) return;
 					var value = event.target.options[event.target.selectedIndex].value;
 					room.assets.push(value);
 					kha.save();
-					//loadRoom(kha, room);
+					component.forceUpdate();
 				}}, options)
 			)
 		);
 		rows.push(row);
-
-		//select.onfocus = function () {
-		//	select.selectedIndex = -1;
-		//};
 
 		for (var id in room.assets) {
 			let asset = findAsset(kha, room.assets[id]);

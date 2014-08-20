@@ -110,7 +110,7 @@ define(['../react.js', '../config.js', '../log.js'], function (React, config, lo
 		render: function () {
 			return (
 				React.DOM.div(null,
-					React.DOM.select({value: 'flash', onChange: this.selection},
+					React.DOM.select({defaultValue: 'flash', onChange: this.selection},
 						React.DOM.option({value: 'flash'}, 'Flash'),
 						React.DOM.option({value: 'html5'}, 'HTML5'),
 						React.DOM.option({value: 'windows'}, 'Windows'),

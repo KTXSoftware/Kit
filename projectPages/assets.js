@@ -51,7 +51,7 @@ define(['../config.js', '../react.js'], function (config, React) {
 			}
 			return (
 				React.DOM.div(null,
-					React.DOM.select({value: 'image', onChange: this.selection},
+					React.DOM.select({defaultValue: 'image', onChange: this.selection},
 						React.DOM.option({value: 'image'}, 'Images'),
 						React.DOM.option({value: 'music'}, 'Music'),
 						React.DOM.option({value: 'sound'}, 'Sounds'),
