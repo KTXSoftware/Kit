@@ -44,11 +44,11 @@ define(['../react.js', '../config.js', '../log.js'], function (React, config, lo
 		});
 
 		child.stderr.on('data', function (data) {
-			log.error(data);
+			log.info(data);
 		});
 
 		child.on('error', function (err) {
-			log.error('Haxe error');
+			log.error('Hake error');
 			//callback();
 		});
 

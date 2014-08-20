@@ -335,7 +335,7 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 	return React.createClass({displayName: 'Projects',
 		getInitialState: function() {
 			loadRepositories(this.redraw);
-			return {repos: []};
+			return {repos: repoarray};
 		},
 		redraw: function (repos) {
 			this.setState({repos: repos});
