@@ -6,7 +6,7 @@ requirejs(['domReady', './react.js', './log.js', './pages/log.js', './pages/conf
 
 		var gui = require('nw.gui');
 		config.init(gui.App.dataPath);
-		git.init(document.getElementById('kittinfo'), process, gui.App.dataPath);
+		git.init(process, gui.App.dataPath);
 
 		var Kit = React.createClass({displayName: 'Kit',
 			getInitialState: function () {
@@ -54,7 +54,7 @@ requirejs(['domReady', './react.js', './log.js', './pages/log.js', './pages/conf
 										React.DOM.button({onClick: this.loadProjects}, 'Projects')
 									),
 									React.DOM.div({className: 'topright'},
-										React.DOM.input({checked: config.hideUnavailable(), type: 'checkbox', onClick: function (event) { config.setHideUnavailable(event.target.checked); self.forceUpdate(); }}),
+										React.DOM.input({checked: config.hideUnavailable(), type: 'checkbox', onChange: function (event) { config.setHideUnavailable(event.target.checked); self.forceUpdate(); }}),
 										React.DOM.span(null, ' Hide unavailable projects '),
 										React.DOM.button({onClick: this.loadConfig}, 'Config'),
 										React.DOM.button({onClick: this.loadLog}, 'Log'),
@@ -75,7 +75,6 @@ requirejs(['domReady', './react.js', './log.js', './pages/log.js', './pages/conf
 				);
 			}
 		});
-
 		React.renderComponent(Kit(), document.body);
 	});
 });

@@ -5,7 +5,6 @@ define(['./config.js', './log.js'], function (config, log) {
 	var os = require('os');
 	var path = require('path');
 	var spawn = require('child_process').spawn;
-	var kitt = null;
 	var dataPath = null;
 	var myProcess = null;
 
@@ -21,7 +20,7 @@ define(['./config.js', './log.js'], function (config, log) {
 			}
 		}
 		data = data.slice(lastGoodReturn);
-		//kitt.innerHTML = data;
+		document.getElementById('kittinfo').innerHTML = data;
 	}
 
 	function spawnGit(parameters, dir, callback, retrynum) {
@@ -212,8 +211,7 @@ define(['./config.js', './log.js'], function (config, log) {
 
 	var exports = {};
 
-	exports.init = function(aKitt, aProcess, aDataPath) {
-		kitt = aKitt;
+	exports.init = function(aProcess, aDataPath) {
 		myProcess = aProcess;
 		dataPath = aDataPath;
 	}
@@ -222,13 +220,13 @@ define(['./config.js', './log.js'], function (config, log) {
 		fs.stat(projectsDir + repo.name, function(err, stats) {
 			if (!err && stats.isDirectory()) {
 				pull(projectsDir, projectsDir + repo.name, !isSpecial(repo.name) && repo.name.indexOf('/') === -1, function () {
-					//kitt.innerHTML = '';
+					document.getElementById('kittinfo').innerHTML = '';
 					callback();
 				});
 			}
 			else {
 				clone(repo, repos, "master", null, projectsDir, repo.name, projectsDir, !isSpecial(repo.name) && repo.name.indexOf('/') === -1, function() {
-					//kitt.innerHTML = '';
+					document.getElementById('kittinfo').innerHTML = '';
 					callback();
 				});
 			}

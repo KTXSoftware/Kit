@@ -320,7 +320,7 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 	var kittanimated = false;
 
 	function animate() {
-		var kitt = document.getElementById("kitt");
+		var kitt = document.getElementById('kitt');
 
 		++kittcount;
 		var kittx = (Math.sin(kittcount / 100) + 1) / 2 * (window.innerWidth - 100);
@@ -352,16 +352,13 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 				var tr = React.DOM.tr(null,
 					React.DOM.td(null, project.name),
 					React.DOM.td(null, React.DOM.button({onClick: function () {
-						//document.getElementById("kitt").style.visibility = "visible";
-						//kittanimated = true;
-						//animate();
-						git.update(project, this.state.repos, config.projectsDirectory() + "/",
+						document.getElementById('kitt').style.visibility = 'visible';
+						kittanimated = true;
+						animate();
+						git.update(project, self.state.repos, config.projectsDirectory() + "/",
 							function() {
-								//document.getElementById("kitt").style.visibility = "hidden";
-								//kittanimated = false;
-								//button.element.removeChild(button.element.lastChild);
-								//button.element.appendChild(document.createTextNode("Update"));
-								//openButton.element.disabled = false;
+								document.getElementById('kitt').style.visibility = 'hidden';
+								kittanimated = false;
 								self.forceUpdate();
 							}
 						);
