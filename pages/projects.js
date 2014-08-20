@@ -335,13 +335,12 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 	return React.createClass({displayName: 'Projects',
 		getInitialState: function() {
 			loadRepositories(this.redraw);
-			return {repos: [], projectName: null};
+			return {repos: []};
 		},
 		redraw: function (repos) {
-			if (this.state.projectName === null) this.setState({repos: repos, projectName: null});
+			this.setState({repos: repos});
 		},
 		render: function () {
-			if (this.state.projectName !== null) return Project({name: this.state.projectName});
 			var self = this;
 			let lines = [];
 			for (let r in this.state.repos) {
@@ -363,7 +362,7 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 							}
 						);
 					}}, project.available ? 'Update' : 'Download')),
-					React.DOM.td(null, React.DOM.button({disabled: !project.available, onClick: function () { self.setState({repos: [], projectName: project.name}) }}, 'Open'))
+					React.DOM.td(null, React.DOM.button({disabled: !project.available, onClick: function () { self.props.loadProject(project.name); }}, 'Open'))
 				);
 				lines.push(tr);
 			}

@@ -1,6 +1,6 @@
 "use strict";
 
-requirejs(['domReady', './react.js', './log.js', './pages/log.js', './pages/config.js', './config.js', './pages/projects.js', './git.js'], function (domReady, React, log, Log, Config, config, Projects, git) {
+requirejs(['domReady', './react.js', './log.js', './pages/log.js', './pages/config.js', './config.js', './pages/projects.js', './pages/project.js', './git.js'], function (domReady, React, log, Log, Config, config, Projects, Project, git) {
 	domReady(function () {
 		log.info('Started Kit');
 
@@ -28,13 +28,13 @@ requirejs(['domReady', './react.js', './log.js', './pages/log.js', './pages/conf
 			loadProjects: function () {
 				this.setState({page: 'Projects'});
 			},
+			loadProject: function (name) {
+				this.setState({page: 'Project', projectName: name});
+			},
 			render: function () {
 				var self = this;
 				var page = null;
 				switch (this.state.page) {
-					case 'Empty':
-						page = Empty();
-						break;
 					case 'Log':
 						page = Log();
 						break;
@@ -42,7 +42,10 @@ requirejs(['domReady', './react.js', './log.js', './pages/log.js', './pages/conf
 						page = Config();
 						break;
 					case 'Projects':
-						page = Projects();
+						page = Projects({loadProject: function (name) { self.loadProject(name); }});
+						break;
+					case 'Project':
+						page = Project({name: this.state.projectName});
 						break;
 				}
 				return (
