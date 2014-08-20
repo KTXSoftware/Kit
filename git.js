@@ -2,6 +2,7 @@
 
 define(['./config.js', './log.js'], function (config, log) {
 	var fs = require('fs');
+var os = require('os');
 	var path = require('path');
 	var spawn = require('child_process').spawn;
 	var kitt = null;
@@ -29,19 +30,21 @@ define(['./config.js', './log.js'], function (config, log) {
 		var params = '';
 		for (var p in parameters) params += ' ' + parameters[p];
 
-		log.info('Calling git' + params + ' in ' + dir);
-		
-		var env = myProcess.env;
-		env.GIT_ASKPASS = myProcess.cwd() + '/Kit/kitpass/kitpass.exe';
-		env.KIT_DATA_PATH = dataPath;
-		var process = spawn(config.git(), parameters, {cwd: dir, env: env});
-		process.stdin.setEncoding('utf8');
-		var std = '';
-		
-		process.stdout.on('data', function (data) {
-			std += data;
-			log.info(data);
-		});
+	log.info('Calling git' + params + ' in ' + dir);
+	
+	var env = myProcess.env;
+	if (os.platform() === 'darwin') env.GIT_ASKPASS = myProcess.cwd() + '/Kit/kitpass/kitpass-osx';
+	else if (os.platform() === 'linux') env.GIT_ASKPASS = myProcess.cwd() + '/Kit/kitpass/kitpass-linux';
+	else env.GIT_ASKPASS = myProcess.cwd() + '/Kit/kitpass/kitpass.exe';
+	env.KIT_DATA_PATH = dataPath;
+	var process = spawn(config.git(), parameters, {cwd: dir, env: env});
+	process.stdin.setEncoding('utf8');
+	var std = '';
+	
+	process.stdout.on('data', function (data) {
+		std += data;
+		log.info(data);
+	});
 
 		process.stderr.on('data', function (data) {
 			kittMessage(data);

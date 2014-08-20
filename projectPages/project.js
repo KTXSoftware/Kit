@@ -2,6 +2,7 @@ define(['../react.js', '../config.js'], function (React, config) {
 	var cp = require("child_process");
 	var fs = require('fs');
 	var os = require("os");
+var log = require('../log.js');
 
 	function open(file) {
 		if (os.platform() === 'linux') { }
@@ -38,6 +39,20 @@ define(['../react.js', '../config.js'], function (React, config) {
 		var child = cp.spawn(config.projectsDirectory() + "/" + repository + "/Kha/Tools/hake/" + exe,
 			[system, "mp3=" + config.mp3Encoder(), "aac=" + config.aacEncoder()],
 			{ cwd: config.projectsDirectory() + "/" + repository});
+
+		child.stdout.on('data', function (data) {
+			log.info(data);
+		});
+
+		child.stderr.on('data', function (data) {
+			log.error(data);
+		});
+
+		child.on('error', function (err) {
+			log.error('Haxe error');
+			//callback();
+		});
+
 		child.on('close', callback);
 	}
 
