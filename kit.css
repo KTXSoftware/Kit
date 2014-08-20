@@ -82,7 +82,7 @@ button {
 
 button:disabled {
 	color: rgb(156, 162, 167);
-	background-image: linear-gradient(to bottom, rgb(77, 79, 72) 0%, rgb(64, 65, 68) 5%, rgb(22, 32, 32) 10%, rgb(22, 22, 22) 95%, rgb(5, 5, 5) 100%);
+	background-image: linear-gradient(to bottom, rgb(77, 79, 72) 0%, rgb(64, 65, 68) 5%, rgb(22, 22, 22) 10%, rgb(22, 22, 22) 95%, rgb(5, 5, 5) 100%);
 }
 
 .alert {
