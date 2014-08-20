@@ -1,8 +1,7 @@
-define(['../react.js', '../config.js'], function (React, config) {
+define(['../react.js', '../config.js', '../log.js'], function (React, config, log) {
 	var cp = require("child_process");
 	var fs = require('fs');
 	var os = require("os");
-var log = require('../log.js');
 
 	function open(file) {
 		if (os.platform() === 'linux') { }
