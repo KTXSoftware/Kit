@@ -364,7 +364,7 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 							function() {
 								document.getElementById('kitt').style.visibility = 'hidden';
 								kittanimated = false;
-								self.forceUpdate();
+								if (self.isMounted()) self.forceUpdate();
 							}
 						);
 					}}, project.available ? 'Update' : 'Download')),
