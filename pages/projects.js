@@ -211,7 +211,12 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 		});
 	}
 
+	var loading = false;
+
 	function loadRepositories(callback) {
+		if (loading) return;
+
+		loading = true;
 		projects = {};
 		serverCount = config.servers().length;
 
@@ -334,7 +339,8 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 
 	return React.createClass({displayName: 'Projects',
 		getInitialState: function() {
-			loadRepositories(this.redraw);
+			var self = this;
+			loadRepositories(function (repos) { loading = false; if (self.isMounted()) self.redraw(repos); });
 			return {repos: repoarray};
 		},
 		redraw: function (repos) {
