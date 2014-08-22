@@ -1,14 +1,17 @@
 define(function () {
 	return {
-		text: '',
+		div: document.createElement('div'),
 		info: function (text) {
-			this.text += text + '\n';
-			//this.lines.push({ level: 0, text: text });
+			this.div.appendChild(document.createTextNode(text));
+			this.div.appendChild(document.createElement('br'));
 		},
 		error: function (text) {
 			document.getElementById('logButton').className = 'alert';
-			this.text += text + '\n';
-			//this.lines.push({ level: 1, text: text });
+			var span = document.createElement('span');
+			span.style.color = '#ff0000';
+			span.appendChild(document.createTextNode(text));
+			this.div.appendChild(span);
+			this.div.appendChild(document.createElement('br'));
 		}
 	};
 });

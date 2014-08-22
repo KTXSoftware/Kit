@@ -36,7 +36,7 @@ define(['../react.js', '../config.js', '../log.js'], function (React, config, lo
 
 	function create(system, repository, callback) {
 		var child = cp.spawn(config.projectsDirectory() + "/" + repository + "/Kha/Tools/hake/" + exe,
-			[system, "mp3=" + config.mp3Encoder(), "aac=" + config.aacEncoder()],
+			[system, "mp3=" + config.mp3Encoder(), "aac=" + config.aacEncoder(), 'gfx=' + config.windowsGraphics(), 'vs=' + config.visualStudio()],
 			{ cwd: config.projectsDirectory() + "/" + repository});
 
 		child.stdout.on('data', function (data) {
