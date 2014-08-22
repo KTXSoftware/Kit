@@ -6,6 +6,27 @@ html, body {
 	font-size: 14px;
 }
 
+::-webkit-scrollbar {
+	width: 12px;
+}
+ 
+::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.4);
+	-webkit-border-radius: 10px;
+	border-radius: 10px;
+}
+ 
+::-webkit-scrollbar-thumb {
+	-webkit-border-radius: 10px;
+	border-radius: 10px;
+	background: rgba(28, 28, 28, 0.8); 
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+}
+
+::-webkit-scrollbar-thumb:window-inactive {
+	background: rgba(28, 28, 28, 0.4); 
+}
+
 a:active {color: #ff0000; text-decoration: none}
 a:link {color: #a00000; text-decoration: none}
 a:visited {color: #a00000; text-decoration: none}
