@@ -373,7 +373,7 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 				lines.push(tr);
 			}
 			return (
-				React.DOM.table(null, lines)
+				React.DOM.table(null, React.DOM.tbody(null, lines))
 			);
 		}
 	});
