@@ -372,9 +372,12 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 				);
 				lines.push(tr);
 			}
-			return (
-				React.DOM.table(null, React.DOM.tbody(null, lines))
-			);
+			if (lines.length === 0) {
+				return React.DOM.table({width: '100%', height: '100%'}, React.DOM.tbody(null, React.DOM.tr(null, React.DOM.td({style: {'text-align': 'center'}}, React.DOM.img({src: 'pac.gif'})))));
+			}
+			else {
+				return React.DOM.table(null, React.DOM.tbody(null, lines));
+			}
 		}
 	});
 });
