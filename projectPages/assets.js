@@ -72,7 +72,9 @@ define(['../config.js', '../react.js'], function (config, React) {
 						var value = event.target.value.replace(/\\/g, "/");
 						var name = value.substr(value.lastIndexOf("/") + 1);
 						copyFile(value, config.projectsDirectory() + "/" + self.props.repository + dir + name);
-						var shortname = name.substring(0, name.lastIndexOf("."));
+						var shortname = '';
+						if (name.lastIndexOf('.') > 0) shortname = name.substring(0, name.lastIndexOf("."));
+						else shortname = name;
 						self.props.kha.assets.push({
 							id: uuid.v4(),
 				      		type: self.state.type,
