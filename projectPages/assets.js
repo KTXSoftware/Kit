@@ -60,7 +60,7 @@ define(['../config.js', '../react.js'], function (config, React) {
 					React.DOM.br(null),
 					React.DOM.input({type: 'file', onChange: function (event) {
 						var dir = "/Assets/"
-						switch (this.selection) {
+						switch (self.state.type) {
 						case 'image':
 							dir += "Graphics/";
 							break;
@@ -71,17 +71,16 @@ define(['../config.js', '../react.js'], function (config, React) {
 						}
 						var value = event.target.value.replace(/\\/g, "/");
 						var name = value.substr(value.lastIndexOf("/") + 1);
-						copyFile(value, config.projectsDirectory() + "/" + this.props.repository + dir + name);
+						copyFile(value, config.projectsDirectory() + "/" + self.props.repository + dir + name);
 						var shortname = name.substring(0, name.lastIndexOf("."));
-						var type = this.selection;
-						this.props.kha.assets.push({
+						self.props.kha.assets.push({
 							id: uuid.v4(),
-				      		type: type,
+				      		type: self.state.type,
 				      		file: name,
 				      		name: shortname
 						});
-						this.props.kha.save();
-						this.forceUpdate();
+						self.props.kha.save();
+						self.forceUpdate();
 					}}),
 					React.DOM.div(null,
 						React.DOM.table(null, React.DOM.tbody(null, rows))
