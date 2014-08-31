@@ -50,7 +50,9 @@ define(['../react.js', '../config.js', '../log.js'], function (React, config, lo
 				wmv: '',
 				kfx: '',
 				khafolders: true,
-				embedflashassets: false
+				embedflashassets: false,
+				graphicsApi: config.windowsGraphics(),
+				visualStudioVersion: config.visualStudio()
 			}, log, callback);
 		}
 		else {
