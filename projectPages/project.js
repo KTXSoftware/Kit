@@ -35,24 +35,44 @@ define(['../react.js', '../config.js', '../log.js'], function (React, config, lo
 	}
 
 	function create(system, repository, callback) {
-		var child = cp.spawn(config.projectsDirectory() + "/" + repository + "/Kha/Tools/hake/" + exe,
-			[system, "mp3=" + config.mp3Encoder(), "aac=" + config.aacEncoder(), 'gfx=' + config.windowsGraphics(), 'vs=' + config.visualStudio()],
-			{ cwd: config.projectsDirectory() + "/" + repository});
+		var khamake = require(config.projectsDirectory() + '/' + repository + '/Kha/Tools/khamake/main.js');
+		if (khamake !== undefined && khamake.api !== undefined && khamake.api >= 1) {
+			khamake.run({
+				from: config.projectsDirectory() + '/' + repository,
+				to: config.projectsDirectory() + '/' + repository + '/build',
+				platform: system,
+				haxe: '',
+				ogg: '',
+				aac: config.aacEncoder(),
+				mp3: config.mp3Encoder(),
+				h264: '', 
+				webm: '',
+				wmv: '',
+				kfx: '',
+				khafolders: true,
+				embedflashassets: false
+			}, log, callback);
+		}
+		else {
+			var child = cp.spawn(config.projectsDirectory() + "/" + repository + "/Kha/Tools/hake/" + exe,
+				[system, "mp3=" + config.mp3Encoder(), "aac=" + config.aacEncoder(), 'gfx=' + config.windowsGraphics(), 'vs=' + config.visualStudio()],
+				{ cwd: config.projectsDirectory() + "/" + repository});
 
-		child.stdout.on('data', function (data) {
-			log.info(data);
-		});
+			child.stdout.on('data', function (data) {
+				log.info(data);
+			});
 
-		child.stderr.on('data', function (data) {
-			log.info(data);
-		});
+			child.stderr.on('data', function (data) {
+				log.info(data);
+			});
 
-		child.on('error', function (err) {
-			log.error('Hake error');
-			//callback();
-		});
+			child.on('error', function (err) {
+				log.error('Hake error');
+				//callback();
+			});
 
-		child.on('close', callback);
+			child.on('close', callback);
+		}
 	}
 
 	return React.createClass({displayName: 'ProjectPage',
