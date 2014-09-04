@@ -146,7 +146,7 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 						headers: {'User-Agent': 'Kit'}
 					};
 					++serverCount;
-					https.get(options, function (res) { getServerInfo(res, server, serverPrio, serverData, page+1); }).on("error", function(e) {
+					https.get(options, function (res) { getServerInfo(res, server, serverPrio, serverData, page + 1, callback); }).on("error", function(e) {
 						log.error(server.name + ": Could not load additional projects data.");
 						finishServer(callback);
 					});;
