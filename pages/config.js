@@ -18,12 +18,15 @@ define(['../log.js', '../react.js', '../config.js'], function (log, React, confi
 		graphics: function (event) {
 			config.setWindowsGraphics(event.target.value);
 		},
+		componentDidMount: function () {
+			this.refs.dirbutton.getDOMNode().setAttribute('nwdirectory', 'nwdirectory');
+		},
 		render: function () {
 			return (
 				React.DOM.table(null,
 					React.DOM.tr(null,
 						React.DOM.td(null, 'Projects directory'),
-						React.DOM.td(null, React.DOM.input({type: 'file', nwdirectory: 'nwdirectory', onChange: this.projectsDir}))
+						React.DOM.td(null, React.DOM.input({ref: 'dirbutton', type: 'file', onChange: this.projectsDir}))
 					),
 					React.DOM.tr(null,
 						React.DOM.td(null, 'MP3 encoder'),

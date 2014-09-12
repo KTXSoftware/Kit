@@ -372,7 +372,7 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js']
 				);
 				lines.push(tr);
 			}
-			if (lines.length === 0) {
+			if (this.state.repos.length === 0) {
 				return React.DOM.table({width: '100%', height: '100%'}, React.DOM.tbody(null, React.DOM.tr(null, React.DOM.td({style: {'text-align': 'center'}}, React.DOM.img({src: 'pac.gif'})))));
 			}
 			else {
