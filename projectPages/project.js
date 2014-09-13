@@ -35,9 +35,31 @@ define(['../react.js', '../config.js', '../log.js'], function (React, config, lo
 	}
 
 	function create(system, repository, callback) {
-		var khamake = require(config.projectsDirectory() + '/' + repository + '/Kha/Tools/khamake/main.js');
-		if (khamake !== undefined && khamake.api !== undefined && khamake.api >= 1) {
-			khamake.run({
+		var make = null;
+		try {
+			make = require(config.projectsDirectory() + '/' + repository + '/Kha/Tools/khamake/main.js');
+		}
+		catch (e) {
+
+		}
+		if (make === null) {
+			try {
+				make = require(config.projectsDirectory() + '/' + repository + '/Kore/Tools/koremake/main.js');
+			}
+			catch (e) {
+
+			}
+		}
+		if (make === null) {
+			try {
+				make = require(config.projectsDirectory() + '/' + repository + '/Kt/Tools/koremake/main.js');
+			}
+			catch (e) {
+
+			}
+		}
+		if (make !== null && make.api !== undefined && make.api >= 1) {
+			make.run({
 				from: config.projectsDirectory() + '/' + repository,
 				to: config.projectsDirectory() + '/' + repository + '/build',
 				platform: system,
