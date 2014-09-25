@@ -2,6 +2,7 @@
 
 define(['../config.js', '../react.js'], function (config, React) {
 	var fs = require("fs");
+	var path = require('path');
 	var uuid = require("node-uuid");
 
 	function remove(array, at) {
@@ -11,6 +12,8 @@ define(['../config.js', '../react.js'], function (config, React) {
 	}
 
 	function copyFile(from, to) {
+		var todir = path.dirname(to);
+		if (!fs.existsSync(todir)) fs.mkdirSync(todir);
 		var data = fs.readFileSync(from);
 		fs.writeFileSync(to, data);
 	}
@@ -55,18 +58,22 @@ define(['../config.js', '../react.js'], function (config, React) {
 						React.DOM.option({value: 'image'}, 'Images'),
 						React.DOM.option({value: 'music'}, 'Music'),
 						React.DOM.option({value: 'sound'}, 'Sounds'),
+						React.DOM.option({value: 'video'}, 'Videos'),
 						React.DOM.option({value: 'blob'}, 'Blobs')
 					),
 					React.DOM.br(null),
 					React.DOM.input({type: 'file', onChange: function (event) {
-						var dir = "/Assets/"
+						var dir = '/Assets/';
 						switch (self.state.type) {
 						case 'image':
-							dir += "Graphics/";
+							dir += 'Graphics/';
 							break;
 						case 'sound':
 						case 'music':
-							dir += "Sound/";
+							dir += 'Sound/';
+							break;
+						case 'video':
+							dir += 'Video/';
 							break;
 						}
 						var value = event.target.value.replace(/\\/g, "/");
@@ -77,9 +84,9 @@ define(['../config.js', '../react.js'], function (config, React) {
 						else shortname = name;
 						self.props.kha.assets.push({
 							id: uuid.v4(),
-				      		type: self.state.type,
-				      		file: name,
-				      		name: shortname
+							type: self.state.type,
+							file: name,
+							name: shortname
 						});
 						self.props.kha.save();
 						self.forceUpdate();

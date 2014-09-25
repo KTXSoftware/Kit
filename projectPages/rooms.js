@@ -3,8 +3,6 @@
 define(['../react.js'], function (React) {
 	var uuid = require("node-uuid");
 
-	var roomsColumn;
-
 	function findAsset(kha, assetId) {
 		for (var asset in kha.assets) {
 			if (kha.assets[asset].id === assetId) {
@@ -59,7 +57,7 @@ define(['../react.js'], function (React) {
 		options.push(React.DOM.option({value: '-'}, '-'));
 		for (var asset in kha.assets) {
 			if (kha.assets[asset].type === type && !contains(room, kha.assets[asset])) {
-				var option = React.DOM.option({value: kha.assets[asset].id}, kha.assets[asset].name)
+				var option = React.DOM.option({value: kha.assets[asset].id}, kha.assets[asset].name);
 				options.push(option);
 			}
 		}
@@ -103,6 +101,7 @@ define(['../react.js'], function (React) {
 				loadAssets(this.props.kha, this.props.kha.rooms[this.state.room], "image", "Images", roomRows, this);
 				loadAssets(this.props.kha, this.props.kha.rooms[this.state.room], "sound", "Sounds", roomRows, this);
 				loadAssets(this.props.kha, this.props.kha.rooms[this.state.room], "music", "Music", roomRows, this);
+				loadAssets(this.props.kha, this.props.kha.rooms[this.state.room], 'video', 'Videos', roomRows, this);
 				loadAssets(this.props.kha, this.props.kha.rooms[this.state.room], "blob", "Blobs", roomRows, this);
 			}
 
