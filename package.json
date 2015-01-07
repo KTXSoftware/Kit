@@ -1,5 +1,5 @@
 {
 	"name": "Kit",
-	"main": "index.html",
-	"js-flags": "--harmony"
+	"version": "0.7",
+	"main": "main.js"
 }

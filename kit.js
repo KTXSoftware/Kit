@@ -4,9 +4,10 @@ requirejs(['domReady', './react.js', './log.js', './pages/log.js', './pages/conf
 	domReady(function () {
 		log.info('Started Kit');
 
-		var gui = require('nw.gui');
-		config.init(gui.App.dataPath);
-		git.init(process, gui.App.dataPath);
+		var remote = require('remote');
+		var app = remote.require('app');
+		config.init(app.getDataPath());
+		git.init(process, app.getDataPath());
 
 		var Kit = React.createClass({displayName: 'Kit',
 			getInitialState: function () {
@@ -14,10 +15,10 @@ requirejs(['domReady', './react.js', './log.js', './pages/log.js', './pages/conf
 				else return {page: 'Projects'};
 			},
 			reload: function () {
-				gui.Window.get().reload(3);
+				remote.getCurrentWindow().restart();
 			},
 			loadDevtools: function () {
-				gui.Window.get().showDevTools();
+				remote.getCurrentWindow().toggleDevTools();
 			},
 			loadLog: function () {
 				document.getElementById('logButton').className = '';
