@@ -1,7 +1,15 @@
 define(['../log.js', '../react.js', '../config.js'], function (log, React, config) {
 	return React.createClass({displayName: 'Config',
 		projectsDir: function (event) {
-			config.setProjectsDirectory(event.target.value);
+			var self = this;
+			var remote = require('remote');
+			var dialog = remote.require('dialog');
+			dialog.showOpenDialog(remote.getCurrentWindow(), { title: 'Projects Directory', properties: ['openDirectory']}, function (directories) {
+				if (directories.length > 0) {
+					config.setProjectsDirectory(directories[0]);
+					self.refs.dirbutton.getDOMNode().textContent = directories[0];
+				}
+			});
 		},
 		mp3: function (event) {
 			config.setMP3Encoder(event.target.value);
@@ -18,15 +26,12 @@ define(['../log.js', '../react.js', '../config.js'], function (log, React, confi
 		graphics: function (event) {
 			config.setWindowsGraphics(event.target.value);
 		},
-		componentDidMount: function () {
-			this.refs.dirbutton.getDOMNode().setAttribute('nwdirectory', 'nwdirectory');
-		},
 		render: function () {
 			return (
 				React.DOM.table(null,
 					React.DOM.tr(null,
 						React.DOM.td(null, 'Projects directory'),
-						React.DOM.td(null, React.DOM.input({ref: 'dirbutton', type: 'file', onChange: this.projectsDir}))
+						React.DOM.td(null, React.DOM.button({ref: 'dirbutton', onClick: this.projectsDir}, config.projectsDirectory() === '' ? 'Choose a directory' : config.projectsDirectory()))
 					),
 					React.DOM.tr(null,
 						React.DOM.td(null, 'MP3 encoder'),

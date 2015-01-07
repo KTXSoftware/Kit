@@ -21,7 +21,7 @@ define(function () {
 			{
 				"name": "ktx-gitblit"
 				"type": "gitblit",
-				"url": "git.ktxsoftware.com",
+				"url": "gitserver.com",
 				"user": "",
 				"pass": ""
 			}
@@ -37,20 +37,9 @@ define(function () {
 	function load() {
 		try {
 			options = JSON.parse(fs.readFileSync(optionsFile, {encoding: 'utf8'}));
-			if (options.hideUnavailable === undefined) options.hideUnavailable = false;
-			if (options.git === undefined) options.git = 'git';
-			if (options.visualStudio === undefined) options.visualStudio = 'vs2013';
-			if (options.windowsGraphics === undefined) options.windowsGraphics = 'direct3d9';
-			for (var s in options.servers) {
-				var server = options.servers[s];
-				if (server.name === undefined) server.name = 'ktx-github';
-			}
 		}
 		catch (e) {
-			var localStorage = window.localStorage;
-			options.projectsDirectory = localStorage.getItem('projectsDirectory');
-			options.mp3encoder = localStorage.getItem('mp3encoder');
-			options.aacencoder = localStorage.getItem('aacencoder');
+			
 		}
 		for (var s in options.servers) {
 			var server = options.servers[s];

@@ -11,7 +11,7 @@ requirejs(['domReady', './react.js', './log.js', './pages/log.js', './pages/conf
 
 		var Kit = React.createClass({displayName: 'Kit',
 			getInitialState: function () {
-				if (config.projectsDirectory() === null) return {page: 'Config'};
+				if (config.projectsDirectory() === '') return {page: 'Config'};
 				else return {page: 'Projects'};
 			},
 			reload: function () {
