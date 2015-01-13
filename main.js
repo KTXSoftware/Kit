@@ -14,7 +14,7 @@ app.on('window-all-closed', function() {
 app.on('ready', function() {
 	app.commandLine.appendSwitch('js-flags', '--harmony');
 	mainWindow = new BrowserWindow({width: 1024, height: 768});
-	//mainWindow.toggleDevTools();
+	mainWindow.toggleDevTools();
 	mainWindow.loadUrl('file://' + __dirname + '/index.html');
 	mainWindow.on('closed', function() {
 		mainWindow = null;
