@@ -5,7 +5,8 @@ define(function () {
 	function executeNextTask() {
 		if (tasks.length > 0) {
 			busy = true;
-			tasks.pop().execute(executeNextTask);
+			var task = tasks.pop();
+			task.task.execute(task.parameters, executeNextTask);
 		}
 		else {
 			busy = false;
@@ -14,8 +15,8 @@ define(function () {
 
 	var exports = {};
 
-	exports.add = function (task) {
-		tasks.push(task);
+	exports.add = function (task, parameters) {
+		tasks.push({task: task, parameters: parameters});
 		if (!busy) {
 			executeNextTask();
 		}

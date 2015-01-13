@@ -1,6 +1,6 @@
 "use strict";
 
-define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js', '../ProjectsListTask.js', '../Tasks.js'], function (git, log, config, React, Project, ProjectsListTask, Tasks) {
+define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js', '../ProjectsListTask.js', '../GitTask.js', '../Tasks.js'], function (git, log, config, React, Project, ProjectsListTask, GitTask, Tasks) {
 	var os = require("os");
 	var fs = require("fs");
 	var http = require("http");
@@ -113,7 +113,7 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js',
 			ProjectsListTask.addChangeCallbacks(function (repos) {
 				if (self.isMounted()) self.redraw(repos);
 			});
-			Tasks.add(ProjectsListTask);
+			Tasks.add(ProjectsListTask, {});
 			return {repos: []};
 		},
 		redraw: function (repos) {
@@ -133,13 +133,14 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js',
 						document.getElementById('kitt').style.visibility = 'visible';
 						kittanimated = true;
 						animate();
-						git.update(project, projects, config.projectsDirectory() + "/",
+						Tasks.add(GitTask, {repo: project, projectsDir: config.projectsDirectory() + '/'});
+						/*git.update(project, projects, config.projectsDirectory() + "/",
 							function() {
 								document.getElementById('kitt').style.visibility = 'hidden';
 								kittanimated = false;
 								if (self.isMounted()) self.forceUpdate();
 							}
-						);
+						);*/
 					}}, project.available ? 'Update' : 'Download')),
 					React.DOM.td(null, React.DOM.button({disabled: !project.available, onClick: function () { self.props.loadProject(project.name); }}, 'Open'))
 				);

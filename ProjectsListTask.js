@@ -200,7 +200,7 @@ define(['./config.js', './log.js'], function (config, log) {
 		changeCallbacks.remove(callback);
 	};
 
-	exports.execute = function (callback) {
+	exports.execute = function (parameters, callback) {
 		projects = {};
 		serverCount = config.servers().length;
 
