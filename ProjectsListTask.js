@@ -179,6 +179,14 @@ define(['./config.js', './log.js'], function (config, log) {
 			}
 			else if (server.type === 'gitblit') {
 				repositories = JSON.parse(data);
+                var reponames = [];
+                for (let rep in repositories) {
+                    let name = repositories[rep].name;
+                    if (name.endsWith('.git')) name = name.substr(0, name.length - 4);
+                    reponames.push(name);
+                }
+                serverData.repositories = reponames;
+				config.saveServerData(server.name);
 				for (var r in repositories) {
 					var repo = repositories[r];
 					let name = repo.name.substr(0, repo.name.length - 4).trim();

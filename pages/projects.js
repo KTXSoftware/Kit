@@ -1,6 +1,6 @@
 "use strict";
 
-define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js', '../ProjectsListTask.js', '../GitTask.js', '../Tasks.js'], function (git, log, config, React, Project, ProjectsListTask, GitTask, Tasks) {
+define(['../log.js', '../config.js', '../react.js', './project.js', '../ProjectsListTask.js', '../GitTask.js', '../Tasks.js'], function (log, config, React, Project, ProjectsListTask, GitTask, Tasks) {
 	var os = require("os");
 	var fs = require("fs");
 	var http = require("http");
