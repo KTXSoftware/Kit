@@ -90,22 +90,6 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js',
 		loadRepositories();
 	};*/
 
-	var kittcount = 0;
-	var kittanimated = false;
-
-	function animate() {
-		var kitt = document.getElementById('kitt');
-
-		++kittcount;
-		var kittx = (Math.sin(kittcount / 100) + 1) / 2 * (window.innerWidth - 100);
-
-		if (kitt !== null) {
-			kitt.style.top = window.innerHeight - 20 + 'px';
-			kitt.style.left = kittx + 'px';
-		}
-		if (kittanimated) window.requestAnimationFrame(animate);
-	}
-
 	return React.createClass({displayName: 'Projects',
 		getInitialState: function() {
 			var self = this;
@@ -130,17 +114,7 @@ define(['../git.js', '../log.js', '../config.js', '../react.js', './project.js',
 				var tr = React.DOM.tr(null,
 					React.DOM.td(null, project.name),
 					React.DOM.td(null, React.DOM.button({onClick: function () {
-						document.getElementById('kitt').style.visibility = 'visible';
-						kittanimated = true;
-						animate();
 						Tasks.add(GitTask, {repo: project, projectsDir: config.projectsDirectory() + '/'});
-						/*git.update(project, projects, config.projectsDirectory() + "/",
-							function() {
-								document.getElementById('kitt').style.visibility = 'hidden';
-								kittanimated = false;
-								if (self.isMounted()) self.forceUpdate();
-							}
-						);*/
 					}}, project.available ? 'Update' : 'Download')),
 					React.DOM.td(null, React.DOM.button({disabled: !project.available, onClick: function () { self.props.loadProject(project.name); }}, 'Open'))
 				);

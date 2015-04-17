@@ -8,7 +8,6 @@ define(function () {
 		mp3encoder: '',
 		aacencoder: '',
 		hideUnavailable: false,
-		git: 'git',
 		visualStudio: 'vs2013',
 		windowsGraphics: 'direct3d9',
 		servers: [
@@ -90,10 +89,6 @@ define(function () {
 		return options.hideUnavailable;
 	};
 
-	exports.git = function () {
-		return options.git;
-	};
-
 	exports.visualStudio = function () {
 		return options.visualStudio;
 	};
@@ -119,11 +114,6 @@ define(function () {
 
 	exports.setHideUnavailable = function (hide) {
 		options.hideUnavailable = hide;
-		save();
-	};
-
-	exports.setGit = function (git) {
-		options.git = git;
 		save();
 	};
 

@@ -17,9 +17,6 @@ define(['../log.js', '../react.js', '../config.js'], function (log, React, confi
 		aac: function (event) {
 			config.setAACEncoder(event.target.value);
 		},
-		git: function (event) {
-			config.setGit(event.target.value);
-		},
 		visualStudio: function (event) {
 			config.setVisualStudio(event.target.value);
 		},
@@ -40,10 +37,6 @@ define(['../log.js', '../react.js', '../config.js'], function (log, React, confi
 					React.DOM.tr(null,
 						React.DOM.td(null, 'AAC encoder'),
 						React.DOM.td(null, React.DOM.input({defaultValue: config.aacEncoder(), onChange: this.aac}))
-					),
-					React.DOM.tr(null,
-						React.DOM.td(null, 'Git command'),
-						React.DOM.td(null, React.DOM.input({defaultValue: config.git(), onChange: this.git}))
 					),
 					React.DOM.tr(null,
 						React.DOM.td(null, 'Visual Studio'),

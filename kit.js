@@ -1,13 +1,12 @@
 "use strict";
 
-requirejs(['domReady', './react.js', './log.js', './pages/log.js', './pages/config.js', './config.js', './pages/projects.js', './pages/project.js', './git.js'], function (domReady, React, log, Log, Config, config, Projects, Project, git) {
+requirejs(['domReady', './react.js', './log.js', './pages/log.js', './pages/config.js', './config.js', './pages/projects.js', './pages/project.js'], function (domReady, React, log, Log, Config, config, Projects, Project) {
 	domReady(function () {
 		log.info('Started Kit');
 
 		var remote = require('remote');
 		var app = remote.require('app');
-		config.init(app.getDataPath());
-		git.init(process, app.getDataPath());
+		config.init(app.getPath('userData'));
 
 		var Kit = React.createClass({displayName: 'Kit',
 			getInitialState: function () {
