@@ -1,4 +1,0 @@
-[submodule "kitpass"]
-	path = kitpass
-	url = ../kitpass
-	branch = master
