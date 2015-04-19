@@ -22,7 +22,7 @@ define(['./log.js'], function (log) {
 		var exe = app.getPath('exe');
 		var dir = exe.substr(0, exe.lastIndexOf(path.sep));
 
-		var process = spawn(path.join(dir, 'kitgit.exe'), parameters);
+		var process = spawn(path.join(dir, 'kitgit'), parameters);
 		process.stdin.setEncoding('utf8');
 
 		let lastLine = '';
