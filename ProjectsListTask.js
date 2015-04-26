@@ -156,7 +156,7 @@ define(['./config.js', './log.js'], function (config, log) {
 					return;
 				}
 				else {
-					result = JSON.parse(data);
+					let result = JSON.parse(data);
 					if (page === 0) {
 						repositories = [];
 						serverData.etag = res.headers.etag;
@@ -165,8 +165,8 @@ define(['./config.js', './log.js'], function (config, log) {
 					else {
 						repositories = serverData.repositories;
 					}
-					for (var r in result) {
-						repositories.push(result[r].name.trim());
+					for (let r of result) {
+						repositories.push(r.name.trim());
 					}
 					config.saveServerData(server.name);
 				}
@@ -179,22 +179,41 @@ define(['./config.js', './log.js'], function (config, log) {
 			}
 			else if (server.type === 'gitblit') {
 				repositories = JSON.parse(data);
-                var reponames = [];
-                for (let rep in repositories) {
-                    let name = repositories[rep].name;
+                let reponames = [];
+                for (let repo in repositories) {
+                    let name = repo.name;
                     if (name.endsWith('.git')) name = name.substr(0, name.length - 4);
                     reponames.push(name);
                 }
                 serverData.repositories = reponames;
 				config.saveServerData(server.name);
-				for (var r in repositories) {
-					var repo = repositories[r];
-					let name = repo.name.substr(0, repo.name.length - 4).trim();
+				for (let repo of repositories) {
+					let name = repo.name;
+					if (name.endsWith('.git')) name = name.substr(0, name.length - 4);
 					let project = {name: name, server: server, prio: serverPrio, baseurl: 'https://' + server.url + '/r/', others: []};
 					addProject(project, serverPrio, projects);
 				}
 				finishServer(callback);
 			}
+            else if (server.type === 'gitlab') {
+				let result = JSON.parse(data);
+				let reponames = [];
+				for (let repo of result) {
+					let name = repo.path;
+					if (name.endsWith('.git')) name = name.substr(0, name.length - 4);
+					reponames.push(name);
+				}
+				serverData.repositories = reponames;
+				config.saveServerData(server.name);
+				for (let repo of result) {
+					let name = repo.path;
+					if (name.endsWith('.git')) name = name.substr(0, name.length - 4);
+					let path = server.path;
+					let project = {name: name, server: server, prio: serverPrio, baseurl: 'https://' + server.url + '/' + repo.namespace.path + '/', others: []};
+					addProject(project, serverPrio, projects);
+				}
+				finishServer(callback);
+            }
 		});
 	}
 
@@ -238,6 +257,23 @@ define(['./config.js', './log.js'], function (config, log) {
 					headers: {
 						'User-Agent': 'Kit',
 						'Authorization': 'Basic ' + new Buffer(server.user + ':' + server.pass).toString('base64')
+					}
+				};
+			}
+			else if (server.type === 'gitlab') {
+				let serverurl = server.url;
+				let serverpath = '';
+				let split = server.url.indexOf('/');
+				if (split >= 0) {
+					serverurl = server.url.substr(0, split);
+					serverpath = server.url.substr(split);
+				}
+				options = {
+					host: serverurl,
+					path: serverpath + '/api/v3/projects',
+					headers: {
+						'User-Agent': 'Kit',
+						'PRIVATE-TOKEN': server.token
 					}
 				};
 			}
