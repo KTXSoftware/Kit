@@ -1,7 +1,10 @@
+"use strict";
+
 define(['../react.js', '../config.js', '../log.js'], function (React, config, log) {
 	var cp = require("child_process");
 	var fs = require('fs');
 	var os = require("os");
+	var path = require('path');
 
 	function open(file) {
 		if (os.platform() === 'linux') { }
@@ -34,13 +37,23 @@ define(['../react.js', '../config.js', '../log.js'], function (React, config, lo
 		exe = "hake.exe";
 	}
 
+	function resetModule(cachedir) {
+		for (let entry in require.cache) {
+			if (entry.startsWith(cachedir)) {
+				delete require.cache[entry];
+			}
+		}
+	}
+
 	function create(system, repository, callback) {
+		resetModule(path.join(config.projectsDirectory(), repository));
 		var make = null;
 		try {
 			make = require(config.projectsDirectory() + '/' + repository + '/Kha/Tools/khamake/main.js');
 		}
 		catch (e) {
-
+			let a = 3;
+			++a;
 		}
 		if (make === null) {
 			try {

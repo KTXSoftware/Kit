@@ -180,15 +180,15 @@ define(['./config.js', './log.js'], function (config, log) {
 			else if (server.type === 'gitblit') {
 				repositories = JSON.parse(data);
                 let reponames = [];
-                for (let repo in repositories) {
-                    let name = repo.name;
+                for (let rep in repositories) {
+                    let name = repositories[rep].name;
                     if (name.endsWith('.git')) name = name.substr(0, name.length - 4);
                     reponames.push(name);
                 }
                 serverData.repositories = reponames;
 				config.saveServerData(server.name);
-				for (let repo of repositories) {
-					let name = repo.name;
+				for (let rep in repositories) {
+					let name = repositories[rep].name;
 					if (name.endsWith('.git')) name = name.substr(0, name.length - 4);
 					let project = {name: name, server: server, prio: serverPrio, baseurl: 'https://' + server.url + '/r/', others: []};
 					addProject(project, serverPrio, projects);
