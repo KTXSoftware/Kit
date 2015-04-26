@@ -206,10 +206,11 @@ define(['./config.js', './log.js'], function (config, log) {
 				serverData.repositories = reponames;
 				config.saveServerData(server.name);
 				for (let repo of result) {
+					if (repo.namespace.path !== server.namespace) continue;
 					let name = repo.path;
 					if (name.endsWith('.git')) name = name.substr(0, name.length - 4);
 					let path = server.path;
-					let project = {name: name, server: server, prio: serverPrio, baseurl: 'https://' + server.url + '/' + repo.namespace.path + '/', others: []};
+					let project = {name: name, server: server, prio: serverPrio, baseurl: 'https://' + server.url + '/' + server.namespace + '/', others: []};
 					addProject(project, serverPrio, projects);
 				}
 				finishServer(callback);
